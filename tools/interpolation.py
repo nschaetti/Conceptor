@@ -39,11 +39,11 @@ def interpolation_alignment(truth_pattern, generated_pattern, interpolation_rate
     :return:
     """
     # Lengths
-    truth_length = truth_pattern.shape[dim]
-    generated_length = generated_pattern.shape[dim]
+    truth_length = truth_pattern.shape[0]
+    generated_length = generated_pattern.shape[0]
 
     # Quadratic interpolation functions
-    truth_pattern_func = interp1d(np.arange(truth_pattern), truth_pattern, kind=kind)
+    truth_pattern_func = interp1d(np.arange(truth_length), truth_pattern, kind=kind)
     generated_pattern_func = interp1d(np.arange(generated_length), generated_pattern, kind=kind)
 
     # Get interpolated patterns
