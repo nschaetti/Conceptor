@@ -1,7 +1,7 @@
 # coding=utf-8
 #
-# File : generate.py
-# Description : Generate pattern from loaded reservoir and conceptors.
+# File : training.py
+# Description : Training methods and linear solvers.
 # Date : 14th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free
@@ -25,6 +25,8 @@
 # Imports
 import numpy as np
 import numpy.linalg as lin
+from logic import NOT
+from numpy.linalg import inv, pinv
 
 
 # Ridge regression
@@ -70,3 +72,70 @@ def train_outputs(training_states, training_targets, ridge_param_wout, dim=0):
 # end train_outputs
 
 
+# Incremental loading
+def incremental_loading(D, X, P, Win, A, aperture, training_length):
+    """
+    Incremental lodaing
+    :param D: Current input simulation matrix
+    :param X: Training states
+    :param P: Original pattern
+    :param Win: Input weight matrix
+    :param A: Current disjonction of all conceptors loaded
+    :param training_length: Training length
+    :return: The new input simulation matrix D
+    """
+    # Compute D increment
+    Td = np.dot(Win, P.reshape(1, -1)) - np.dot(D, X)
+
+    # The linear subspace of the reservoir state space that are not yet
+    # occupied by any pattern.
+    F = NOT(A)
+
+    # Compute the increment for matrix D
+    S_old = np.dot(F, X)
+    Dinc = (
+            np.dot(
+                np.dot(
+                    lin.pinv(
+                        np.dot(S_old, S_old.T) / training_length + math.pow(aperture, -2) * np.eye(Nx)
+                    ),
+                    S_old
+                ),
+                Td.T
+            ) / training_length
+    ).T
+
+    return D + Dinc
+# end incremental_loading
+
+
+# Incremental training
+def incremental_training(Wout, X, P, A, ridge_param, training_length, reservoir_size):
+    """
+    Incremental training of output weights.
+    :param Wout: Current Wout
+    :param X: Training states.
+    :param P: Training pattern.
+    :param ridge_param: Regularisation parameter.
+    :param training_length: Training length
+    :param reservoir_size: Reservoir size
+    :return: Incremented Wout
+    """
+    # Compute Wout
+    Tout = P - Wout @ X
+
+    # The linear subspace of the reservoir state space that are not yet
+    # occupied by any pattern.
+    F = NOT(A)
+
+    # ...
+    S = F @ X
+
+    # Compute incremente for Wout
+    Wout_inc = (
+            (pinv(S @ S.T / training_length + ridge_param * np.eye(Nx)) @ S @ Tout.T) / training_length
+    ).T
+
+    # Update Wout
+    return Wout + Wout_inc
+# end incremental_training
