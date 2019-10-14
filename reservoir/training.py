@@ -57,6 +57,38 @@ def ridge_regression(X, Y, ridge_param, dim=0):
 # end ridge_regression
 
 
+# Reservoir loading
+def loading(X, Xold, Wbias, ridge_param, dim=0):
+    """
+    Reservoir loading
+    :param X: Reservoir states
+    :param Xold: Timeshifted stated (-1)
+    :param Wbias: Bias matrix
+    :param ridge_param: Ridge parameter
+    :param dim: Time dimension
+    :return: Loaded internal weight matrix, learned states
+    """
+    # Reservoir size
+    if dim == 0:
+        learn_length = X.shape[0]
+        reservoir_size = X.shape[1]
+    else:
+        learn_length = X.shape[1]
+        reservoir_size = X.shape[0]
+    # end if
+
+    # Target for learning W
+    X_new = (
+            np.arctanh(X) - np.repeat(Wbias.reshape(1, -1), learn_length, axis=0).T
+    )
+
+    # Learning W
+    return (
+        (lin.inv(Xold @ Xold.T + ridge_param * np.eye(reservoir_size)) @ Xold) @ X_new.T
+    ).T, X_new
+# end loading
+
+
 # Train outputs
 def train_outputs(training_states, training_targets, ridge_param_wout, dim=0):
     """
