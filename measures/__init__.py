@@ -23,7 +23,8 @@
 
 
 # Imports
+from .gcs import generalized_cosine_similarity, conceptor_cosine_similarity
 from .nrsme import nrmse, nrmse_aligned
 
 # All
-__all__ = ['nrmse', 'nrmse_aligned']
+__all__ = ['generalized_cosine_similarity', 'conceptor_cosine_similarity', 'nrmse', 'nrmse_aligned']
