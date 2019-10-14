@@ -1,7 +1,7 @@
 # coding=utf-8
 #
-# File : and.py
-# Description : AND in Conceptor Logic
+# File : __init__.py
+# Description : Reservoir and ESN tools
 # Date : 14th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free
@@ -23,10 +23,12 @@
 
 
 # Imports
-from .generate_internal_weights import generate_internal_weights
+from .free_run import free_run, free_run_input_simulation, free_run_input_recreation
 from .run import run
 from .training import ridge_regression, train_outputs
+from .weights import generate_internal_weights, from_matlab, scale_weights
 
 
 # All
-__all__ = ['generate_internal_weights', 'run', 'ridge_regression', 'train_outputs']
+__all__ = ['free_run', 'free_run_input_simulation', 'free_run_input_recreation', 'generate_internal_weights', 'run',
+           'ridge_regression', 'train_outputs', 'from_matlab', 'scale_weights']
