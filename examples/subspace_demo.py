@@ -29,15 +29,21 @@ import numpy as np
 import numpy.linalg as lin
 import matplotlib.pyplot as plt
 import math
-from scipy.linalg import svd
 import scipy.io as io
 import argparse
-from scipy.interpolate import interp1d
 from patterns import patts
-import reservoir
-import measures
-import conceptors
-import tools
+import Conceptors.reservoir
+import Conceptors.measures
+import Conceptors.conceptors
+import Conceptors.tools
+import Conceptors.visualization
+import Conceptors.logic
+# import reservoir
+# import measures
+# import conceptors
+# import tools
+# import visualization
+# import logic
 
 
 # Experiment control
@@ -80,15 +86,15 @@ else:
 # Load W from matlab file and random init ?
 if args.w != "":
     # Load internal weights
-    Wstar_raw = reservoir.load_matlab_file(args.w, args.w_name)
+    Wstar_raw = Conceptors.reservoir.load_matlab_file(args.w, args.w_name)
 else:
     # Generate internal weights
-    Wstar_raw = reservoir.generate_internal_weights(reservoir_size, connectivity, seed)
+    Wstar_raw = Conceptors.reservoir.generate_internal_weights(reservoir_size, connectivity, seed)
 # end if
 
 # Load Win from matlab file or init randomly
 if args.win != "":
-    Win_raw = reservoir.load_matlab_file(args.win, args.win_name)
+    Win_raw = Conceptors.reservoir.load_matlab_file(args.win, args.win_name)
 else:
     # Generate Win
     Win_raw = np.random.randn(reservoir_size, 1)
@@ -102,7 +108,7 @@ else:
 # end if
 
 # Scale raw weights and initialize weights
-Wstar, Win, Wbias = reservoir.scale_weights(
+Wstar, Win, Wbias = Conceptors.reservoir.scale_weights(
     W=Wstar_raw,
     Win=Win_raw,
     Wbias=Wbias_raw,
@@ -150,7 +156,7 @@ plotting_patterns = np.zeros((n_patterns, signal_plot_length))
 last_states = np.zeros((reservoir_size, n_patterns))
 
 # Collection of conceptors
-conceptor_collector = conceptors.Collector(reservoir_size)
+conceptor_collector = Conceptors.conceptors.Collector(reservoir_size)
 
 # We run the ESN model and we save
 # all the needed informations.
@@ -163,7 +169,7 @@ for p in range(n_patterns):
     x = np.zeros(reservoir_size)
 
     # Run reservoir
-    state_collector, pattern_collector = reservoir.run(
+    state_collector, pattern_collector = Conceptors.reservoir.run(
         pattern=patt,
         reservoir_size=reservoir_size,
         x_start=x,
@@ -185,14 +191,15 @@ for p in range(n_patterns):
     last_states[:, p] = state_collector[:, -1]
 
     # Train conceptor
-    C, U, Snew, Sorg = conceptors.train(
+    C, U, Snew, Sorg, R = Conceptors.conceptors.train(
         X=state_collector,
         aperture=alpha,
         dim=1
     )
 
-    # Save conceptor
-    conceptor_collector.add(p, C, U, Snew, Sorg)
+    # Save conceptor and singular values
+    conceptor_collector.add(p, C, U, Snew, Sorg, R)
+    singular_value_collectors[p] = Snew
 
     # Plotting states and patterns
     plotting_states[p] = state_collector[:, :signal_plot_length]
@@ -209,7 +216,7 @@ for p in range(n_patterns):
 # end for
 
 # Compute readout
-Wout = reservoir.train_outputs(
+Wout = Conceptors.reservoir.train_outputs(
     training_states=training_states,
     training_targets=training_targets,
     ridge_param_wout=ridge_param_wout,
@@ -217,11 +224,11 @@ Wout = reservoir.train_outputs(
 )
 
 # Compute training error (NRMSE)
-NRMSE_readout = measures.nrmse(np.dot(Wout, training_states), training_targets)
+NRMSE_readout = Conceptors.measures.nrmse(np.dot(Wout, training_states), training_targets)
 print(u"NRMSE readout: {}".format(NRMSE_readout))
 
 # Load W
-W, X_new = reservoir.loading(
+W, X_new = Conceptors.reservoir.loading(
     X=training_states,
     Xold=training_states_old,
     Wbias=Wbias,
@@ -230,7 +237,7 @@ W, X_new = reservoir.loading(
 )
 
 # Training errors per neuron
-NRMSE_W = measures.nrmse(np.dot(W, training_states_old), X_new)
+NRMSE_W = Conceptors.measures.nrmse(np.dot(W, training_states_old), X_new)
 print(u"mean NRMSE W: {}".format(np.average(NRMSE_W)))
 
 # Run loaded reservoir to observe a messy output. Do this with starting
@@ -238,7 +245,7 @@ print(u"mean NRMSE W: {}".format(np.average(NRMSE_W)))
 # initialize network state.
 for p in range(4):
     # Run the loaded reservoir
-    free_run_states, free_run_outputs = reservoir.free_run(
+    free_run_states, free_run_outputs = Conceptors.reservoir.free_run(
         x_start=last_states[:, p],
         W=W,
         Wbias=Wbias,
@@ -259,7 +266,7 @@ for p in range(n_patterns):
     x = 0.5 * np.random.randn(reservoir_size)
 
     # Free run with the loaded reservoir
-    conceptor_test_states, conceptor_test_output = reservoir.free_run(
+    conceptor_test_states, conceptor_test_output = Conceptors.reservoir.free_run(
         x_start=x,
         W=W,
         Wbias=Wbias,
@@ -284,7 +291,7 @@ MSE_aligned = np.zeros(n_patterns)
 # For each pattern
 for p in range(n_patterns):
     # Interpolate and align truth and generated
-    aligned_ouputs, max_ind = tools.interpolation_alignment(
+    aligned_ouputs, max_ind = Conceptors.tools.interpolation_alignment(
         truth_pattern=plotting_patterns[p],
         generated_pattern=conceptor_test_output[p],
         interpolation_rate=interpolation_rate,
@@ -298,7 +305,7 @@ for p in range(n_patterns):
     conceptor_test_output[p] = aligned_ouputs
 
     # Evaluate aligned signals with NRMSE
-    NRMSE_aligned[p] = measures.nrmse(
+    NRMSE_aligned[p] = Conceptors.measures.nrmse(
         conceptor_test_output_aligned[p].reshape(1, -1),
         plotting_patterns[p].reshape(1, -1)
     )
@@ -312,120 +319,33 @@ print(u"NRMSE aligned : {}".format(NRMSE_aligned))
 print(u"MSE aligned : {}".format(MSE_aligned))
 print(u"Average MSE : {}".format(np.average(NRMSE_aligned)))
 
-# Figure (square size)
-plt.figure(figsize=(12, 8))
-
-# For each pattern
-for p in range(n_patterns):
-    # Plot 1 : original pattern and recreated pattern
-    plt.subplot(n_patterns, 4, p * 4 + 1)
-    plt.plot(conceptor_test_output_aligned[p], color='r', linewidth=5)
-    plt.plot(plotting_patterns[p], color='b', linewidth=1.5)
-
-    # Title
-    if p == 0:
-        plt.title(u'p and y')
-    # end if
-
-    # X labels
-    if p == 3:
-        plt.xticks([0, 10, 20])
-    else:
-        plt.xticks([])
-    # end if
-
-    # Y limits
-    plt.ylim([-1, 1])
-    plt.yticks([-1, 0, 1])
-
-    # Plot 2 : states
-    plt.subplot(n_patterns, 4, p * 4 + 2)
-    plt.plot(plotting_states[p, 0])
-    plt.plot(plotting_states[p, 1])
-    plt.plot(plotting_states[p, 2])
-
-    # Title
-    if p == 0:
-        plt.title(u'two neurons')
-    # end if
-
-    # X labels
-    if p == 3:
-        plt.xticks([0, 10, 20])
-    else:
-        plt.xticks([])
-    # end if
-
-    # Y limits
-    plt.ylim([-1, 1])
-    plt.yticks([-1, 0, 1])
-
-    # Plot 3 : Log10 of singular values (PC energy)
-    plt.subplot(n_patterns, 4, p * 4 + 3)
-    plt.plot(np.log10(singular_value_collectors[p]), 'red', linewidth=2)
-
-    # X labels
-    if p == 3:
-        plt.xticks([0, 50, 100])
-    else:
-        plt.xticks([])
-    # end if
-
-    # Limits
-    plt.ylim([-20, 10])
-
-    # Title
-    if p == 0:
-        plt.title(u'log10 PC Energy')
-    # end if
-
-    # Learning PC energy
-    plt.subplot(n_patterns, 4, p * 4 + 4)
-    plt.plot(singular_value_collectors[p, :10], 'red', linewidth=2)
-
-    # Title
-    if p == 0:
-        plt.title(u"leading PC energy")
-    # end if
-
-    # Limits
-    plt.ylim([0, 40.0])
-# end for
-
-# Show figure
-plt.show()
+# Show patterns and singular values
+Conceptors.visualization.plot_patterns_with_singular_values(
+    truth_patterns=plotting_patterns,
+    generated_patterns=conceptor_test_output_aligned,
+    Xs=plotting_states,
+    SVs=singular_value_collectors
+)
 
 # Energy similarities between driven response spaces
-
 # List of conceptor similarities
 similarity_matrix_conceptors = np.zeros((n_patterns, n_patterns))
 
 # For each combination of patterns
 for p1 in range(n_patterns):
     for p2 in range(n_patterns):
-        similarity_num = math.pow(
-            lin.norm(
-                np.dot(
-                    np.dot(
-                        np.dot(
-                            np.diag(np.sqrt(Cs[p1][2])),
-                            Cs[p1][1].T
-                        ),
-                        Cs[p2][1]
-                    ),
-                    np.diag(np.sqrt(Cs[p2][2]))
-                ),
-                'fro'),
-            2)
+        # Get conceptors
+        C1, U1, S1, _, _ = conceptor_collector.get(p1)
+        C2, U2, S2, _, _ = conceptor_collector.get(p2)
 
-        # Div
-        similarity_div = np.dot(
-            lin.norm(Cs[p1][0], 'fro'),
-            lin.norm(Cs[p2][0], 'fro')
+        similarity = Conceptors.measures.conceptor_cosine_similarity(
+            C1=C1,
+            U1=U1,
+            S1=S1,
+            C2=C2,
+            U2=U2,
+            S2=S2
         )
-
-        # Similarity
-        similarity = similarity_num / similarity_div
 
         # Save
         similarity_matrix_conceptors[p1, p2] = similarity
@@ -438,70 +358,40 @@ similarity_matrix_correlations = np.zeros((n_patterns, n_patterns))
 # For each combination of patterns
 for p1 in range(n_patterns):
     for p2 in range(n_patterns):
-        similarity_num = math.pow(
-            lin.norm(
-                np.dot(
-                    np.dot(
-                        np.dot(
-                            np.sqrt(np.diag(singular_value_collectors[p1])),
-                            unitary_matrix_collectors[p1].T
-                        ),
-                        unitary_matrix_collectors[p2]
-                    ),
-                    np.sqrt(np.diag(singular_value_collectors[p2]))
-                ),
-                'fro'),
-            2)
+        # Get conceptors
+        _, U1, S1, _, R1 = conceptor_collector.get(p1)
+        _, U2, S2, _, R2 = conceptor_collector.get(p2)
 
-        # Div
-        similarity_div = np.dot(
-            lin.norm(correlation_matrix_collectors[p1], 'fro'),
-            lin.norm(correlation_matrix_collectors[p2], 'fro')
+        # Measure similarity
+        similarity = Conceptors.measures.generalized_cosine_similarity(
+            R1=R1,
+            U1=U1,
+            S1=S1,
+            R2=R2,
+            U2=U2,
+            S2=S2
         )
-
-        # Similarity
-        similarity = similarity_num / similarity_div
 
         # Save
         similarity_matrix_correlations[p1, p2] = similarity
     # end for
 # end for
 
-# Figure (square size)
-# fig = plt.figure(figsize=(5, 5))
+# Plot similarity matrix (conceptors)
+Conceptors.visualization.plot_similarity_matrix(
+    similarity_matrix=similarity_matrix_conceptors,
+    title="C based similarities, a = 10"
+)
 
-# Show similarity matrices
-fig, ax = plt.subplots(figsize=(8, 8))
-cax = ax.matshow(similarity_matrix_conceptors, interpolation='nearest', cmap='Greys_r')
-plt.title(u"C based similaritites, a = 10")
-fig.colorbar(cax, ticks=np.arange(0.1, 1.1, 0.1))
-for (i, j), z in np.ndenumerate(similarity_matrix_conceptors):
-    if (i < 2 and j < 2) or (i > 1 and j > 1):
-        plt.text(j, i, '{:0.2f}'.format(z), ha='center', va='center')
-    else:
-        plt.text(j, i, '{:0.2f}'.format(z), ha='center', va='center', color='white')
-    # end if
-# end for
-plt.show()
+# Plot similarity matrix (correlation matrix)
+Conceptors.visualization.plot_similarity_matrix(
+    similarity_matrix=similarity_matrix_correlations,
+    title="R based similarities"
+)
 
-# Figure (square size)
-# plt.figure(figsize=(5, 5))
-
-# Show R matrix
-fig, ax = plt.subplots(figsize=(8, 8))
-cax = ax.matshow(similarity_matrix_correlations, interpolation='nearest', cmap='Greys_r')
-plt.title(u"R based similaritites")
-fig.colorbar(cax, ticks=np.arange(0.1, 1.1, 0.1))
-for (i, j), z in np.ndenumerate(similarity_matrix_correlations):
-    if (i < 2 and j < 2) or (i > 1 and j > 1):
-        plt.text(j, i, '{:0.2f}'.format(z), ha='center', va='center')
-    else:
-        plt.text(j, i, '{:0.2f}'.format(z), ha='center', va='center', color='white')
-    # end if
-# end for
-plt.show()
-
+#
 # Plotting comparisons for different alphas
+#
 
 # Save each singular values
 plotting_singular_values_sine = np.zeros((len(alphas), reservoir_size))
@@ -509,15 +399,24 @@ plotting_singular_values_periodic = np.zeros((len(alphas), reservoir_size))
 
 # For each alpha value
 for i, a in enumerate(alphas):
+    # Get correlation matrices
+    C1, _, _, _, _ = conceptor_collector.get(0)
+    C2, _, _, _, _ = conceptor_collector.get(2)
+
     # Sine
-    R1 = correlation_matrix_collectors[0]
-    C1 = np.dot(R1, lin.inv(R1 + np.power(a, -2) * I))
+    """C1 = np.dot(R1, lin.inv(R1 + np.power(a, -2) * I))
+    U1, S1, V1 = lin.svd(C1)
+    plotting_singular_values_sine[i] = S1"""
+    C1 = Conceptors.logic.PHI(C1, a)
     U1, S1, V1 = lin.svd(C1)
     plotting_singular_values_sine[i] = S1
 
     # Periodic
-    R2 = correlation_matrix_collectors[2]
+    """R2 = correlation_matrix_collectors[2]
     C2 = np.dot(R2, lin.inv(R2 + np.power(a, -2) * I))
+    U2, S2, V2 = lin.svd(C2)
+    plotting_singular_values_periodic[i] = S2"""
+    C2 = Conceptors.logic.PHI(C2, a)
     U2, S2, V2 = lin.svd(C2)
     plotting_singular_values_periodic[i] = S2
 # end for
