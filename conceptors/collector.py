@@ -23,7 +23,7 @@
 
 # Imports
 import numpy as np
-from logic import OR
+from Conceptors.logic import OR
 
 
 # Collector class

@@ -28,22 +28,17 @@
 import numpy as np
 import numpy.linalg as lin
 import matplotlib.pyplot as plt
-import math
 import scipy.io as io
 import argparse
-from patterns import patts
+
+# Conceptors
+from Conceptors.patterns import patts
 import Conceptors.reservoir
 import Conceptors.measures
 import Conceptors.conceptors
 import Conceptors.tools
 import Conceptors.visualization
 import Conceptors.logic
-# import reservoir
-# import measures
-# import conceptors
-# import tools
-# import visualization
-# import logic
 
 
 # Experiment control
@@ -102,9 +97,9 @@ else:
 
 # Load Wbias from matlab from or init randomly
 if args.wbias != "":
-    Wbias_raw = np.random.randn(reservoir_size)
-else:
     Wbias_raw = io.loadmat("data/params/WbiasRaw.mat")['WbiasRaw'].reshape(-1)
+else:
+    Wbias_raw = np.random.randn(reservoir_size)
 # end if
 
 # Scale raw weights and initialize weights
@@ -157,7 +152,7 @@ last_states = np.zeros((reservoir_size, n_patterns))
 
 # Collection of conceptors
 conceptor_collector = Conceptors.conceptors.Collector(reservoir_size)
-
+exit()
 # We run the ESN model and we save
 # all the needed informations.
 # For each patterns

@@ -25,8 +25,8 @@
 # Imports
 import numpy as np
 import numpy.linalg as lin
-from logic import NOT
-from numpy.linalg import inv, pinv
+from Conceptors.logic import NOT
+from numpy.linalg import pinv
 
 
 # Ridge regression

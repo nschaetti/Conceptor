@@ -1,7 +1,7 @@
 # coding=utf-8
 #
-# File : and.py
-# Description : AND in Conceptor Logic
+# File : __init__.py
+# Description : Main init file.
 # Date : 14th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free
@@ -21,20 +21,14 @@
 # Copyright Nils Schaetti, University of Neuchâtel <nils.schaetti@unine.ch>
 #
 
-
 # Imports
-from .and_operator import AND
-from .not_operator import NOT
+from . import conceptors
+from . import logic
+from . import measures
+from . import patterns
+from . import reservoir
+from . import tools
+from . import visualization
 
-
-# R OR Q
-def OR(R, Q):
-    """
-    R OR Q
-    :param R:
-    :param Q:
-    :return:
-    """
-    RorQ = NOT(AND(NOT(R), NOT(Q)))
-    return RorQ
-# end OR
+# ALL
+__all__ = ['conceptors', 'logic', 'measures', 'patterns', 'reservoir', 'tools', 'visualization']
