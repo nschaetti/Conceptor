@@ -35,7 +35,7 @@ def train(X, aperture, dim=0):
     :param X: Reservoir states
     :param aperture: Aperture
     :param dim: Time dimension
-    :return: Trained conceptor matrix
+    :return: Trained conceptor matrix, Normalized singular values, Singular values, Correlation matrix
     """
     # Learn length
     if dim == 0:
@@ -60,5 +60,5 @@ def train(X, aperture, dim=0):
     Snew = np.diag(Sx) @ lin.inv(np.diag(Sx) + math.pow(aperture, -2) * np.eye(reservoir_size))
 
     # Apply new SVs to get the conceptor
-    return Ux @ Snew @ Ux.T, Ux, Snew, Sx
+    return Ux @ Snew @ Ux.T, Ux, Snew, Sx, R
 # end train

@@ -53,7 +53,7 @@ class Collector:
     ###########################
 
     # Add a conceptor and USU.T
-    def add(self, index, C, U, Snorm, Sorg):
+    def add(self, index, C, U, Snorm, Sorg, R):
         """
         Append a conceptor and its description.
         :param index: Index
@@ -61,9 +61,10 @@ class Collector:
         :param U: Singular vectors
         :param Snorm: Normalized singular values
         :param Sorg: Original singular values
+        :param R: Correlation matrix
         """
         # Add to list
-        self.conceptors[index] = (C, U, Snorm, Sorg)
+        self.conceptors[index] = (C, U, Snorm, Sorg, R)
 
         # Append to A
         self._A = OR(self._A, C)
