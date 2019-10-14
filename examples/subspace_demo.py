@@ -44,18 +44,28 @@ import Conceptors.logic
 # Experiment control
 seed = 1
 reservoir_size = 100
+
+# Weights scaling
 spectral_radius = 1.5
 input_scaling = 1.5
 bias_scaling = 0.2
-ridge_param_wstar = 0.0001
+
+# Sequence lengths
 washout_length = 500
 learn_length = 1000
 signal_plot_length = 20
-ridge_param_wout = 0.01
-alpha = 10
 conceptor_test_length = 200
 singular_plot_length = 50
 free_run_length = 100000
+
+# Regularization
+ridge_param_wstar = 0.0001
+ridge_param_wout = 0.01
+
+# Aperture
+alpha = 10
+
+# Apertures to run
 alphas = [1.0, 10.0, 100.0, 1000.0, 10000.0]
 
 # Setting patterns
@@ -113,7 +123,7 @@ Wstar, Win, Wbias = Conceptors.reservoir.scale_weights(
 )
 
 # Identity matrix
-I = np.eye(reservoir_size)
+# I = np.eye(reservoir_size)
 
 # Number of patterns
 n_patterns = len(patterns)
@@ -152,7 +162,7 @@ last_states = np.zeros((reservoir_size, n_patterns))
 
 # Collection of conceptors
 conceptor_collector = Conceptors.conceptors.Collector(reservoir_size)
-exit()
+
 # We run the ESN model and we save
 # all the needed informations.
 # For each patterns
@@ -180,7 +190,7 @@ for p in range(n_patterns):
 
     # Time shifted states
     state_collector_old = np.zeros((reservoir_size, learn_length))
-    state_collector_old[:, 1:] = state_collector[:-1]
+    state_collector_old[:, 1:] = state_collector[:, :-1]
 
     # Save last state
     last_states[:, p] = state_collector[:, -1]
@@ -194,7 +204,7 @@ for p in range(n_patterns):
 
     # Save conceptor and singular values
     conceptor_collector.add(p, C, U, Snew, Sorg, R)
-    singular_value_collectors[p] = Snew
+    singular_value_collectors[p] = Sorg
 
     # Plotting states and patterns
     plotting_states[p] = state_collector[:, :signal_plot_length]
@@ -251,17 +261,21 @@ for p in range(4):
     )
 # end for
 
+# Output states and signals
+conceptor_test_states = np.zeros((n_patterns, conceptor_test_length, reservoir_size))
+conceptor_test_output = np.zeros((n_patterns, conceptor_test_length))
+
 # Now we generate signal but with conceptors
 # Save states and outputs
 for p in range(n_patterns):
     # Get the corresponding conceptors
-    C, _, _, _ = conceptor_collector.get(p)
+    C, _, _, _, _ = conceptor_collector.get(p)
 
     # Original starting state or get the original
     x = 0.5 * np.random.randn(reservoir_size)
 
     # Free run with the loaded reservoir
-    conceptor_test_states, conceptor_test_output = Conceptors.reservoir.free_run(
+    test_states, test_output = Conceptors.reservoir.free_run(
         x_start=x,
         W=W,
         Wbias=Wbias,
@@ -270,6 +284,10 @@ for p in range(n_patterns):
         run_length=conceptor_test_length,
         washout_length=0
     )
+
+    # Save
+    conceptor_test_states[p] = test_states
+    conceptor_test_output[p] = test_output
 # end for
 
 # Variables for plotting
@@ -294,10 +312,10 @@ for p in range(n_patterns):
     )
 
     # Get aligned states
-    conceptor_test_states_aligned[p] = conceptor_test_states[p, max_ind:max_ind + signal_plot_length]
+    conceptor_test_states_aligned[p] = conceptor_test_states[p, max_ind:max_ind + signal_plot_length, :5]
 
     # Save aligned outputs
-    conceptor_test_output[p] = aligned_ouputs
+    conceptor_test_output_aligned[p] = aligned_ouputs
 
     # Evaluate aligned signals with NRMSE
     NRMSE_aligned[p] = Conceptors.measures.nrmse(
@@ -358,11 +376,11 @@ for p1 in range(n_patterns):
         _, U2, S2, _, R2 = conceptor_collector.get(p2)
 
         # Measure similarity
-        similarity = Conceptors.measures.generalized_cosine_similarity(
-            R1=R1,
+        similarity = Conceptors.measures.conceptor_cosine_similarity(
+            C1=R1,
             U1=U1,
             S1=S1,
-            R2=R2,
+            C2=R2,
             U2=U2,
             S2=S2
         )
