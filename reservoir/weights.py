@@ -65,6 +65,18 @@ def scale_weights(W, Win, Wbias, spectral_radius, input_scaling, bias_scaling):
 # end scale_weights
 
 
+# Load matrix from matlab file
+def load_matlab_file(file_name, entity_name):
+    """
+    Load matrix matlab file
+    :param file_name: Matlab file
+    :param entity_name: Entry name to load.
+    :return: Loaded matrix
+    """
+    return io.loadmat(file_name)[entity_name]
+# end load_matlab_file
+
+
 # Load weights from matlab
 def from_matlab(w_file, w_name, win_file, win_name,  wbias_file, wbias_name):
     """
@@ -78,11 +90,11 @@ def from_matlab(w_file, w_name, win_file, win_name,  wbias_file, wbias_name):
     :return:
     """
     # Load internal weights
-    W_raw = io.loadmat(w_file)[w_name].todense()
+    W_raw = load_matlab_file(w_file, w_name).todense()
 
     # Load Win and Wbias
-    Win_raw = io.loadmat(win_file)[win_name].reshape(-1, 1)
-    Wbias_raw = io.loadmat(wbias_file)[wbias_name].reshape(-1)
+    Win_raw = load_matlab_file(win_file, win_name).reshape(-1, 1)
+    Wbias_raw = load_matlab_file(wbias_file, wbias_name).reshape(-1)
 
     return W_raw, Win_raw, Wbias_raw
 # end from_matlab
