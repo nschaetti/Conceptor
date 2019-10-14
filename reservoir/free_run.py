@@ -56,8 +56,8 @@ def free_run(x_start, W, Wbias, Wout, C, run_length, washout_length):
         # end if
 
         # Save states and outputs
-        run_states[p, t, :] = x
-        run_outputs[p, t] = Wout @ x
+        run_states[t, :] = x
+        run_outputs[t] = Wout @ x
     # end for
 
     return run_states, run_outputs
