@@ -39,20 +39,22 @@ def generalized_cosine_similarity(R1, U1, S1, R2, U2, S2):
     :param S2: Singular values 2
     :return: Generalized cosine similarity
     """
-    similarity_num = math.pow(
+    mult = np.sqrt(S1) @ U1.T @ U2 @ np.sqrt(S2)
+    """similarity_num = math.pow(
         lin.norm(
             np.dot(
                 np.dot(
                     np.dot(
-                        np.sqrt(np.diag(S1)),
+                        np.sqrt(S1),
                         U1.T
                     ),
                     U2
                 ),
-                np.sqrt(np.diag(S2))
+                np.sqrt(S2)
             ),
             'fro'),
-        2)
+        2)"""
+    similarity_num = math.pow(lin.norm(mult, 'fro'), 2)
 
     # Div
     similarity_div = np.dot(
@@ -77,7 +79,8 @@ def conceptor_cosine_similarity(C1, U1, S1, C2, U2, S2):
     :param S2: Singular values 2
     :return: Generalized cosine similarity
     """
-    similarity_num = math.pow(
+    mult = S1 @ U1.T @ U2 @ np.sqrt(S2)
+    """similarity_num = math.pow(
         lin.norm(
             np.dot(
                 np.dot(
@@ -90,7 +93,8 @@ def conceptor_cosine_similarity(C1, U1, S1, C2, U2, S2):
                 np.diag(np.sqrt(S2))
             ),
             'fro'),
-        2)
+        2)"""
+    similarity_num = math.pow(lin.norm(mult, 'fro'), 2)
 
     # Div
     similarity_div = np.dot(
