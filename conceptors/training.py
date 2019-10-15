@@ -48,9 +48,9 @@ def train(X, aperture, dim=0):
 
     # CoRrelation matrix of reservoir states
     if dim == 0:
-        R = X.T @ X / float(learn_length)
+        R = (X.T @ X) / float(learn_length)
     else:
-        R = X @ X.T / float(learn_length)
+        R = (X @ X.T) / float(learn_length)
     # end if
 
     # Compute SVD on R
@@ -60,5 +60,5 @@ def train(X, aperture, dim=0):
     Snew = np.diag(Sx) @ lin.inv(np.diag(Sx) + math.pow(aperture, -2) * np.eye(reservoir_size))
 
     # Apply new SVs to get the conceptor
-    return Ux @ Snew @ Ux.T, Ux, Snew, Sx, R
+    return Ux @ Snew @ Ux.T, Ux, np.diag(Snew), Sx, R
 # end train
