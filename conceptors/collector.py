@@ -1,7 +1,7 @@
 # coding=utf-8
 #
 # File : collector.py
-# Description : A tool class to stock and manage conceptors
+# Description : A tool class to stock and manage Conceptors
 # Date : 14th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free
@@ -36,8 +36,12 @@ class Collector:
     def __init__(self, reservoir_size):
         """
         Constructor
-        :param reservoir_size: Reservoir size
+        :param reservoir_size: Reservoir size (number of units)
         """
+        # Assert type and value
+        assert isinstance(reservoir_size, int)
+        assert reservoir_size > 0
+
         # Parameters
         self.reservoir_size = reservoir_size
 
@@ -56,13 +60,35 @@ class Collector:
     def add(self, index, C, U, Snorm, Sorg, R):
         """
         Append a conceptor and its description.
-        :param index: Index
-        :param C: Conceptor matrix
-        :param U: Singular vectors
-        :param Snorm: Normalized singular values
-        :param Sorg: Original singular values
-        :param R: Correlation matrix
+        :param index: Index as integer refering to the conceptor inserted.
+        :param C: Conceptor matrix (reservoir size x reservoir size).
+        :param U: Singular vectors (reservoir size x reservoir size).
+        :param Snorm: Normalized singular values (reservoir size)
+        :param Sorg: Original singular values (reservoir size)
+        :param R: Correlation matrix (reservoir size x reservoir size)
         """
+        # Assert type
+        assert isinstance(index, int)
+        assert isinstance(C, np.ndarray)
+        assert isinstance(U, np.ndarray)
+        assert isinstance(Snorm, np.ndarray)
+        assert isinstance(Sorg, np.ndarray)
+        assert isinstance(R, np.ndarray)
+
+        # Assert dims
+        assert C.ndim == 2
+        assert U.ndim == 2
+        assert Snorm.ndim == 1
+        assert Sorg.ndim == 1
+        assert R.ndim == 2
+
+        # Assert size
+        assert C.shape == (self.reservoir_size, self.reservoir_size)
+        assert U.shape == (self.reservoir_size, self.reservoir_size)
+        assert Snorm.shape[0] == self.reservoir_size
+        assert Sorg.shape[0] == self.reservoir_size
+        assert R.shape == (self.reservoir_size, self.reservoir_size)
+
         # Add to list
         self.conceptors[index] = (C, U, Snorm, Sorg, R)
 
@@ -75,15 +101,15 @@ class Collector:
         """
         Get conceptor from index
         :param index:
-        :return:
+        :return: (C, U, S normalized, S original, R)
         """
         return self.conceptors[index]
     # end get
 
-    # Reset
+    # Reset conceptor list and A
     def reset(self):
         """
-        Reset
+        Reset conceptor list and A
         """
         # Reset A
         self._A = np.zeros((self.reservoir_size, self.reservoir_size))
@@ -96,9 +122,9 @@ class Collector:
     def A(self):
         """
         Get all conceptor matrix A
-        :return: Matrix A
+        :return: Matrix A (reservoir size x reservoir size)
         """
         return self._A
     # end A
 
-# end collector
+# end Collector
