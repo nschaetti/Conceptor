@@ -371,7 +371,7 @@ class Test_Subspace_Demo(TestCase):
         NRMSE_readout, _, _, _, _, _, _ = self._subspace_demo()
 
         # Check NRMSE readout
-        self.assertAlmostEqual(NRMSE_readout, 0.00067741, msg="NRMSE readout is not correct")
+        self.assertAlmostEqual(NRMSE_readout, 0.00067741, places=4, msg="NRMSE readout is not correct")
     # end test_wout
 
     # Test reservoir loading
@@ -384,7 +384,7 @@ class Test_Subspace_Demo(TestCase):
         _, NRMSE_W, _, _, _, _, _ = self._subspace_demo()
 
         # Check NRMSE W
-        self.assertAlmostEqual(NRMSE_W, 0.030043524742344337, msg="NRMSE W is not correct")
+        self.assertAlmostEqual(NRMSE_W, 0.030043524742344337, places=4, msg="NRMSE W is not correct")
     # end test_reservoir_loading
 
     # Test pattern generation
@@ -402,11 +402,16 @@ class Test_Subspace_Demo(TestCase):
         self.assertEqual(NRMSE_pattern.shape[0], 4, msg="Pattern NRMSE not containing four measures")
 
         # True NRMSEs
-        true_NRMSEs = np.array([0.0079004, 0.00646076, 0.03286722, 0.00665655])
+        true_NRMSEs = np.ndarray([0.0079004, 0.00646076, 0.03286722, 0.00665655])
 
         # Check NRMSE W
         for i in range(NRMSE_pattern.shape[0]):
-            self.assertAlmostEqual(NRMSE_pattern[i], true_NRMSEs[i], msg="Pattern NRMSE {} is not correct".format(i+1))
+            self.assertAlmostEqual(
+                NRMSE_pattern[i],
+                true_NRMSEs[i],
+                places=4,
+                msg="Pattern NRMSE {} is not correct".format(i+1)
+            )
         # end for
     # end test_pattern_generation
 
@@ -434,7 +439,7 @@ class Test_Subspace_Demo(TestCase):
         self.assertEqual(C_sim.shape[1], 4, msg="C similarity matrix dimension 1 is not 4")
 
         # True R similarities
-        true_R_sim = np.matrix([
+        true_R_sim = np.array([
             [1.0,        0.98942504, 0.46658877, 0.49367049],
             [0.98942504, 1.,         0.427216,   0.45357372],
             [0.46658877, 0.427216,   1.,         0.96988298],
@@ -442,7 +447,7 @@ class Test_Subspace_Demo(TestCase):
         ])
 
         # True C similarities
-        true_C_sim = np.matrix([
+        true_C_sim = np.array([
             [1.,         0.81706046, 0.29889339, 0.29934575],
             [0.81706046, 1.,         0.30180539, 0.30757618],
             [0.29889339, 0.30180539, 1.,         0.96809685],
@@ -456,6 +461,7 @@ class Test_Subspace_Demo(TestCase):
                 self.assertAlmostEqual(
                     R_sim[i, j],
                     true_R_sim[i, j],
+                    places=4,
                     msg="R similarity matrix value ({}, {}) is wrong".format(i, j)
                 )
 
@@ -463,6 +469,7 @@ class Test_Subspace_Demo(TestCase):
                 self.assertAlmostEqual(
                     C_sim[i, j],
                     true_C_sim[i, j],
+                    places=4,
                     msg="C similarity matrix value ({}, {}) is wrong".format(i, j)
                 )
             # end for
@@ -493,7 +500,7 @@ class Test_Subspace_Demo(TestCase):
         self.assertEqual(periodic.shape[1], 100, msg="Periodic SVs dimension 1 is not 100")
 
         # Sine true singular values
-        sine_truth = np.matrix([
+        sine_truth = np.array([
             [0.96690364, 0.92937833, 0.7527158,  0.45442216, 0.35322191],
             [0.99965782, 0.9992407,  0.99672553, 0.98813646, 0.98201844],
             [0.99999658, 0.9999924,  0.99996715, 0.99987995, 0.99981693],
@@ -502,7 +509,7 @@ class Test_Subspace_Demo(TestCase):
         )
 
         # Periodic true singular valeurs
-        periodic_truth = np.matrix([
+        periodic_truth = np.array([
             [0.94556989, 0.91813907, 0.88711959, 0.82450062, 0.77085975],
             [0.9994247,  0.9991092,  0.99872918, 0.99787597, 0.99703628],
             [0.99999424, 0.99999108, 0.99998728, 0.99997871, 0.99997028],
@@ -517,6 +524,7 @@ class Test_Subspace_Demo(TestCase):
                 self.assertAlmostEqual(
                     sine[i, j],
                     sine_truth[i, j],
+                    places=4,
                     msg="Wrong value for sine SVs at ({}, {})".format(i, j)
                 )
 
@@ -524,6 +532,7 @@ class Test_Subspace_Demo(TestCase):
                 self.assertAlmostEqual(
                     periodic[i, j],
                     periodic_truth[i, j],
+                    places=4,
                     msg="Wrong value for periodic SVs at ({}, {})".format(i, j)
                 )
             # end for
