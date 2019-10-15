@@ -21,29 +21,42 @@
 # Copyright Nils Schaetti, University of Neuchâtel <nils.schaetti@unine.ch>
 #
 
-
 # Imports
 import numpy as np
 import numpy.linalg as lin
 from Conceptors.logic import NOT
 from numpy.linalg import pinv
+import math
 
 
 # Ridge regression
 def ridge_regression(X, Y, ridge_param, dim=0):
     """
     Ridge regression
-    :param X: Samples
-    :param Y: Observations
-    :param ridge_param: Regularization parameters
-    :param dim: Dimension index of the samples
+    :param X: Samples (Length x Nx OR Nx x length)
+    :param Y: Observations (length x Ny OR Ny x length)
+    :param ridge_param: Regularization parameter
+    :param dim: Position of the temporal dimension.
     :return: Least square solution to Xb + l = Y
     """
+    # Assert types
+    assert isinstance(X, np.ndarray)
+    assert isinstance(Y, np.ndarray)
+    assert isinstance(ridge_param, float) or isinstance(ridge_param, int)
+    assert isinstance(dim, int)
+
+    # Dimension and values
+    assert X.ndim == 2
+    assert Y.ndim == 2
+    assert dim == 0 or dim == 1
+
     # Size
     if dim == 0:
         n_predictors = X.shape[1]
+        assert X.shape[0] == Y.shape[0]
     else:
         n_predictors = X.shape[0]
+        assert X.shape[1] == Y.shape[1]
     # end if
 
     # Compute solution
@@ -57,17 +70,31 @@ def ridge_regression(X, Y, ridge_param, dim=0):
 # end ridge_regression
 
 
-# Reservoir loading
+# Reservoir loading by states prediction.
 def loading(X, Xold, Wbias, ridge_param, dim=0):
     """
-    Reservoir loading
-    :param X: Reservoir states
-    :param Xold: Timeshifted stated (-1)
-    :param Wbias: Bias matrix
-    :param ridge_param: Ridge parameter
-    :param dim: Time dimension
-    :return: Loaded internal weight matrix, learned states
+    Reservoir loading by states prediction.
+    :param X: Reservoir states (Length x Nx OR Nx x length)
+    :param Xold: Timeshifted stated (-1)  (Length x Nx OR Nx x length)
+    :param Wbias: Bias matrix (Nx)
+    :param ridge_param: Regularization parameter
+    :param dim: Position of the temporal dimension.
+    :return: Loaded internal weight matrix (Nx x Nx), learned states (
     """
+    # Assert types
+    assert isinstance(X, np.ndarray)
+    assert isinstance(Xold, np.ndarray)
+    assert isinstance(Wbias, np.ndarray)
+    assert isinstance(ridge_param, float) or isinstance(ridge_param, int)
+    assert isinstance(dim, int)
+
+    # Dimension
+    assert X.ndim == 2
+    assert Xold.ndim == 2
+    assert Wbias.ndim == 1
+    assert X.shape[0] == Xold.shape[0]
+    assert X.shape[1] == Xold.shape[1]
+
     # Reservoir size
     if dim == 0:
         learn_length = X.shape[0]
@@ -78,9 +105,15 @@ def loading(X, Xold, Wbias, ridge_param, dim=0):
     # end if
 
     # Target for learning W
-    X_new = (
-            np.arctanh(X) - np.repeat(Wbias.reshape(1, -1), learn_length, axis=0).T
-    )
+    if dim == 0:
+        X_new = (
+                np.arctanh(X) - np.repeat(Wbias.reshape(-1, 1), learn_length, axis=1)
+        )
+    else:
+        X_new = (
+                np.arctanh(X) - np.repeat(Wbias.reshape(1, -1), learn_length, axis=0).T
+        )
+    # end if
 
     # Learning W
     return (
@@ -89,31 +122,44 @@ def loading(X, Xold, Wbias, ridge_param, dim=0):
 # end loading
 
 
-# Train outputs
+# Train output weights
 def train_outputs(training_states, training_targets, ridge_param_wout, dim=0):
     """
-    Train ESN outputs
-    :param training_states: Training states
-    :param training_targets: Training targets
-    :param ridge_param_wout: Regularization parameters
-    :param dim: Which dimension corresponds to time.
-    :return: Trained Wout matrix
+    Train ESN output weights
+    :param training_states: Training states (length x Nx OR Nx x length)
+    :param training_targets: Training targets (length x Ny OR Ny x length)
+    :param ridge_param_wout: Regularization parameter
+    :param dim: Position of the temporal dimension (0 or 1)
+    :return: Trained Wout matrix (Ny x Ny)
     """
+    # Assert types
+    assert isinstance(training_states, np.ndarray)
+    assert isinstance(training_targets, np.ndarray)
+    assert isinstance(ridge_param_wout, float) or isinstance(ridge_param_wout, int)
+    assert isinstance(dim, int)
+
+    # Dimension
+    assert training_states.ndim == 2
+    assert training_targets.ndim == 2
+    assert dim == 0 or dim == 1
+
     # Solve Ax = b problem
     return ridge_regression(training_states, training_targets, ridge_param_wout, dim)
 # end train_outputs
 
 
-# Incremental loading
-def incremental_loading(D, X, P, Win, A, aperture, training_length):
+# Incremental loading of a reservoir
+def incremental_loading(D, X, P, Win, A, aperture, training_length, dim=0):
     """
-    Incremental lodaing
-    :param D: Current input simulation matrix
-    :param X: Training states
-    :param P: Original pattern
+    Incremental loading of a reservoir.
+    NOT YET TESTED.
+    :param D: Current input simulation matrix (Nx x Nx)
+    :param X: Training states (??)
+    :param P: Original pattern (??)
     :param Win: Input weight matrix
     :param A: Current disjonction of all conceptors loaded
     :param training_length: Training length
+    :param dim: Position of the temporal dimension (0 or 1)
     :return: The new input simulation matrix D
     """
     # Compute D increment
@@ -145,6 +191,7 @@ def incremental_loading(D, X, P, Win, A, aperture, training_length):
 def incremental_training(Wout, X, P, A, ridge_param, training_length, reservoir_size):
     """
     Incremental training of output weights.
+    NOT YET TESTED.
     :param Wout: Current Wout
     :param X: Training states.
     :param P: Training pattern.
