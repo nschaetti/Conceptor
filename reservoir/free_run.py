@@ -44,7 +44,7 @@ def free_run(x_start, W, Wbias, Wout, C, run_length, washout_length, dim=0):
     assert isinstance(W, np.ndarray)
     assert isinstance(Wbias, np.ndarray)
     assert isinstance(Wout, np.ndarray)
-    assert isinstance(C, np.ndarray)
+    assert isinstance(C, np.ndarray) or C is None
     assert isinstance(run_length, int)
     assert isinstance(washout_length, int)
     assert isinstance(dim, int)
@@ -54,14 +54,14 @@ def free_run(x_start, W, Wbias, Wout, C, run_length, washout_length, dim=0):
     assert W.ndim == 2
     assert Wbias.ndim == 1
     assert Wout.ndim == 2
-    assert C.ndim == 2
+    assert C is None or C.ndim == 2
     assert run_length > 0
     assert washout_length >= 0
     assert dim == 0 or dim == 1
 
     # Squared matrices
     assert W.shape[0] == W.shape[1]
-    assert C.shape[0] == C.shape[1]
+    assert C is None or C.shape[0] == C.shape[1]
 
     # Test states and outputs
     if dim == 0:
@@ -121,7 +121,7 @@ def free_run_input_simulation(x_start, W, D, Wbias, Wout, C, run_length, washout
     assert isinstance(D, np.ndarray)
     assert isinstance(Wbias, np.ndarray)
     assert isinstance(Wout, np.ndarray)
-    assert isinstance(C, np.ndarray)
+    assert isinstance(C, np.ndarray) or C is None
     assert isinstance(run_length, int)
     assert isinstance(washout_length, int)
     assert isinstance(dim, int)
@@ -132,15 +132,15 @@ def free_run_input_simulation(x_start, W, D, Wbias, Wout, C, run_length, washout
     assert D.ndim == 2
     assert Wbias.ndim == 1
     assert Wout.ndim == 2
-    assert C.ndim == 2
+    assert C is None or C.ndim == 2
     assert run_length > 0
     assert washout_length >= 0
     assert dim == 0 or dim == 1
 
     # Squared matrices
     assert W.shape[0] == W.shape[1]
-    assert D.shape[0] == R.shape[1]
-    assert C.shape[0] == C.shape[1]
+    assert D.shape[0] == D.shape[1]
+    assert C is None or C.shape[0] == C.shape[1]
 
     # Test states and outputs
     if dim == 0:
@@ -203,7 +203,7 @@ def free_run_input_recreation(x_start, W, R, Win, Wbias, Wout, C, run_length, wa
     assert isinstance(Win, np.ndarray)
     assert isinstance(Wbias, np.ndarray)
     assert isinstance(Wout, np.ndarray)
-    assert isinstance(C, np.ndarray)
+    assert isinstance(C, np.ndarray) or C is None
     assert isinstance(run_length, int)
     assert isinstance(washout_length, int)
     assert isinstance(dim, int)
@@ -215,14 +215,14 @@ def free_run_input_recreation(x_start, W, R, Win, Wbias, Wout, C, run_length, wa
     assert Win.ndim == 2
     assert Wbias.ndim == 1
     assert Wout.ndim == 2
-    assert C.ndim == 2
+    assert C is None or C.ndim == 2
     assert run_length > 0
     assert washout_length >= 0
     assert dim == 0 or dim == 1
 
     # Squared matrices
     assert W.shape[0] == W.shape[1]
-    assert C.shape[0] == C.shape[1]
+    assert C is None or C.shape[0] == C.shape[1]
 
     # Test states and outputs
     run_states = np.zeros((run_length, W.shape[0]))

@@ -186,7 +186,7 @@ for p in range(n_patterns):
         Wstar=Wstar,
         Win=Win,
         Wbias=Wbias,
-        training_length=learn_length,
+        run_length=learn_length,
         washout_length=washout_length
     )
 
