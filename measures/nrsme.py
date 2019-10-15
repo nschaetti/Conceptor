@@ -30,8 +30,8 @@ from scipy.interpolate import interp1d
 def nrmse(predicted, target, norm="sd", axis=1):
     """
     Compute normalized root mean square error. If timeseries if more than 1-D, NRMSE is averaged over dimensions.
-    :param predicted: Predicted timeseries (Dim x timeseries length)
-    :param target: True timeseries (Dim x timeseries length)
+    :param predicted: Predicted timeseries (D x L)
+    :param target: True timeseries (D x L)
     :param norm: Which norm to use (sd or maxmin)
     :return: Normalized Root Mean Square Error
     """

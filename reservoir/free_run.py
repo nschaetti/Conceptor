@@ -26,7 +26,7 @@ import numpy as np
 
 
 # Run reservoir with internal loaded matrix W
-def free_run(x_start, W, Wbias, Wout, C, run_length, washout_length, dim=0):
+def free_run(x_start, W, Wbias, Wout, C, run_length, washout_length):
     """
     Run reservoir with internal loaded matrix W
     :param x_start: Start state (Nx)
@@ -36,7 +36,6 @@ def free_run(x_start, W, Wbias, Wout, C, run_length, washout_length, dim=0):
     :param C: Conceptor (can be none) (Nx x Nx)
     :param run_length: How many timesteps to generate (> 0)?
     :param washout_length: How many timesteps to ignore at the beginning?
-    :param dim: Position of the temporal dimension (default=0).
     :return: resulting states (run_length x Nx OR Nx x run_length, generated outputs (run_length)
     """
     # Assert types
@@ -47,7 +46,6 @@ def free_run(x_start, W, Wbias, Wout, C, run_length, washout_length, dim=0):
     assert isinstance(C, np.ndarray) or C is None
     assert isinstance(run_length, int)
     assert isinstance(washout_length, int)
-    assert isinstance(dim, int)
 
     # Dimension and values
     assert x_start.ndim == 1
@@ -57,19 +55,14 @@ def free_run(x_start, W, Wbias, Wout, C, run_length, washout_length, dim=0):
     assert C is None or C.ndim == 2
     assert run_length > 0
     assert washout_length >= 0
-    assert dim == 0 or dim == 1
 
     # Squared matrices
     assert W.shape[0] == W.shape[1]
     assert C is None or C.shape[0] == C.shape[1]
 
     # Test states and outputs
-    if dim == 0:
-        run_states = np.zeros((run_length, W.shape[0]))
-        run_outputs = np.zeros(run_length)
-    else:
-        run_states = np.zeros((W.shape[0], run_length))
-        run_outputs = np.zeros(run_length)
+    run_states = np.zeros((W.shape[0], run_length))
+    run_outputs = np.zeros(run_length)
     # end if
 
     # Initial state x0
@@ -87,11 +80,7 @@ def free_run(x_start, W, Wbias, Wout, C, run_length, washout_length, dim=0):
 
         # Save states and outputs
         if t >= washout_length:
-            if dim == 0:
-                run_states[t - washout_length, :] = x
-            else:
-                run_states[:, t - washout_length] = x
-            # end if
+            run_states[:, t - washout_length] = x
             run_outputs[t - washout_length] = Wout @ x
         # end if
     # end for
@@ -101,7 +90,7 @@ def free_run(x_start, W, Wbias, Wout, C, run_length, washout_length, dim=0):
 
 
 # Run reservoir with input simulation matrix D
-def free_run_input_simulation(x_start, W, D, Wbias, Wout, C, run_length, washout_length, dim=0):
+def free_run_input_simulation(x_start, W, D, Wbias, Wout, C, run_length, washout_length):
     """
     Run reservoir without input simulation matrix D
     :param x_start: Starting state (Nx)
@@ -112,7 +101,6 @@ def free_run_input_simulation(x_start, W, D, Wbias, Wout, C, run_length, washout
     :param C: Conceptor (can be None) (Nx x Nx)
     :param run_length: How many timesteps to run (> 0).
     :param washout_length: How many timesteps to ignore at the beginning?
-    :param dim: Position of the temporal dimension (default=0).
     :return: resulting states  (run_length x Nx OR run_length x run_length), generated outputs (run_length)
     """
     # Assert types
@@ -124,7 +112,6 @@ def free_run_input_simulation(x_start, W, D, Wbias, Wout, C, run_length, washout
     assert isinstance(C, np.ndarray) or C is None
     assert isinstance(run_length, int)
     assert isinstance(washout_length, int)
-    assert isinstance(dim, int)
 
     # Dimension and values
     assert x_start.ndim == 1
@@ -135,7 +122,6 @@ def free_run_input_simulation(x_start, W, D, Wbias, Wout, C, run_length, washout
     assert C is None or C.ndim == 2
     assert run_length > 0
     assert washout_length >= 0
-    assert dim == 0 or dim == 1
 
     # Squared matrices
     assert W.shape[0] == W.shape[1]
@@ -143,13 +129,8 @@ def free_run_input_simulation(x_start, W, D, Wbias, Wout, C, run_length, washout
     assert C is None or C.shape[0] == C.shape[1]
 
     # Test states and outputs
-    if dim == 0:
-        run_states = np.zeros((run_length, W.shape[0]))
-        run_outputs = np.zeros(run_length)
-    else:
-        run_states = np.zeros((W.shape[0], run_length))
-        run_outputs = np.zeros(run_length)
-    # end if
+    run_states = np.zeros((W.shape[0], run_length))
+    run_outputs = np.zeros(run_length)
 
     # Reservoir initial state
     x = x_start
@@ -167,11 +148,7 @@ def free_run_input_simulation(x_start, W, D, Wbias, Wout, C, run_length, washout
 
         # Save states and outputs if outside washout
         if t >= washout_length:
-            if dim == 0:
-                run_states[t - washout_length, :] = x
-            else:
-                run_states[:, t - washout_length] = x
-            # end if
+            run_states[:, t - washout_length] = x
             run_outputs[t - washout_length] = Wout @ x
         # end if
     # end for
@@ -181,7 +158,7 @@ def free_run_input_simulation(x_start, W, D, Wbias, Wout, C, run_length, washout
 
 
 # Run reservoir with input recreation matrix R
-def free_run_input_recreation(x_start, W, R, Win, Wbias, Wout, C, run_length, washout_length, dim=0):
+def free_run_input_recreation(x_start, W, R, Win, Wbias, Wout, C, run_length, washout_length):
     """
     Run reservoir with input recreation matrix R
     :param x_start: Starting state (reservoir size)
@@ -193,7 +170,6 @@ def free_run_input_recreation(x_start, W, R, Win, Wbias, Wout, C, run_length, wa
     :param C: Conceptor (can be none) (reservoir size x reservoir size)
     :param run_length: How many timestep to run
     :param washout_length: How many timesteps to ignore at the beginning.
-    :param dim: Position of the temporal dimension (default=0).
     :return: resulting state, generated outputs
     """
     # Assert types
@@ -206,7 +182,6 @@ def free_run_input_recreation(x_start, W, R, Win, Wbias, Wout, C, run_length, wa
     assert isinstance(C, np.ndarray) or C is None
     assert isinstance(run_length, int)
     assert isinstance(washout_length, int)
-    assert isinstance(dim, int)
 
     # Dimension and values
     assert x_start.ndim == 1
@@ -218,7 +193,6 @@ def free_run_input_recreation(x_start, W, R, Win, Wbias, Wout, C, run_length, wa
     assert C is None or C.ndim == 2
     assert run_length > 0
     assert washout_length >= 0
-    assert dim == 0 or dim == 1
 
     # Squared matrices
     assert W.shape[0] == W.shape[1]

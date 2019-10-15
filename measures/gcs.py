@@ -31,12 +31,12 @@ import numpy.linalg as lin
 def generalized_cosine_similarity(R1, U1, S1, R2, U2, S2):
     """
     Generalized cosine similarity
-    :param R1: Correlation matrix 1 (reservoir size x reservoir size)
-    :param U1: Singular vectors 1 (reservoir size x reservoir size)
-    :param S1: Singular values 2 (reservoir size)
-    :param R2: Correlation matrix 2 (reservoir size x reservoir size)
-    :param U2: Singular vectors 2 (reservoir size x reservoir size)
-    :param S2: Singular values 2 (reservoir size)
+    :param R1: Correlation matrix 1 (Nx x Nx)
+    :param U1: Singular vectors 1 (Nx x Nx)
+    :param S1: Singular values 2 (Nx)
+    :param R2: Correlation matrix 2 (Nx x Nx)
+    :param U2: Singular vectors 2 (Nx x Nx)
+    :param S2: Singular values 2 (Nx)
     :return: Generalized cosine similarity (float) 0 <= similarity <= 1.0
     """
     # Assert types
@@ -75,12 +75,12 @@ def generalized_cosine_similarity(R1, U1, S1, R2, U2, S2):
 def conceptor_cosine_similarity(C1, U1, S1, C2, U2, S2):
     """
     Generalized cosine similarity
-    :param C1: Conceptor 1 (reservoir size x reservoir size)
-    :param U1: Singular vectors 1 (reservoir size x reservoir size)
-    :param S1: Singular values 1 (reservoir size)
-    :param C2: Conceptor 2 (reservoir size x reservoir size)
-    :param U2: Singular vectors 2 (reservoir size x reservoir size)
-    :param S2: Singular values 2 (reservoir size)
+    :param C1: Conceptor 1 (Nx x Nx)
+    :param U1: Singular vectors 1 (Nx x Nx)
+    :param S1: Singular values 1 (Nx)
+    :param C2: Conceptor 2 (Nx x Nx)
+    :param U2: Singular vectors 2 (Nx x Nx)
+    :param S2: Singular values 2 (Nx)
     :return: Conceptor cosine similarity (float) 0 <= similarity <= 1.0
     """
     # Assert types

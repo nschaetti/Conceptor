@@ -73,7 +73,7 @@ def scale_weights(W, Win, Wbias, spectral_radius, input_scaling, bias_scaling):
     :param bias_scaling: Bias scaling
     :return: W, Win, Wbias
     """
-    assert isinstance(W, np.ndarray)
+    assert isinstance(W, np.ndarray) or isinstance(W, scipy.sparse.csc_matrix)
     assert isinstance(Win, np.ndarray)
     assert isinstance(Wbias, np.ndarray)
     assert isinstance(spectral_radius, float) or isinstance(spectral_radius, int)

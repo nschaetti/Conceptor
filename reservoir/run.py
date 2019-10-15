@@ -27,7 +27,7 @@ import scipy.sparse
 
 
 # Run an echo state network for some steps
-def run(pattern, reservoir_size, x_start, Wstar, Win, Wbias, run_length, washout_length, dim=0):
+def run(pattern, reservoir_size, x_start, Wstar, Win, Wbias, run_length, washout_length):
     """
     Run an echo state network for some steps
     :param pattern: The pattern as a function to input into the ESN.
@@ -37,7 +37,6 @@ def run(pattern, reservoir_size, x_start, Wstar, Win, Wbias, run_length, washout
     :param Wbias: The bias matrix (Nx).
     :param run_length: How many states to return (> 0).
     :param washout_length: How many states to ignore at the beginning ?
-    :param dim: Position of the temporal dimension (default=0).
     :return: output states (Nx x run_length or run_length x Nx), input pattern (run_length)
     """
     # Assert types
@@ -49,7 +48,6 @@ def run(pattern, reservoir_size, x_start, Wstar, Win, Wbias, run_length, washout
     assert isinstance(Wbias, np.ndarray)
     assert isinstance(run_length, int)
     assert isinstance(washout_length, int)
-    assert isinstance(dim, int)
 
     # Dimension and values
     assert x_start.ndim == 1
@@ -58,17 +56,12 @@ def run(pattern, reservoir_size, x_start, Wstar, Win, Wbias, run_length, washout
     assert Wbias.ndim == 1
     assert run_length > 0
     assert washout_length >= 0
-    assert dim == 0 or dim == 1
 
     # Squared matrices
     assert Wstar.shape[0] == Wstar.shape[1]
 
     # State collector
-    if dim == 0:
-        state_collector = np.zeros((reservoir_size, run_length))
-    else:
-        state_collector = np.zeros((run_length, reservoir_size))
-    # end if
+    state_collector = np.zeros((run_length, reservoir_size))
 
     # Pattern collector
     pattern_collector = np.zeros(run_length)
@@ -87,11 +80,7 @@ def run(pattern, reservoir_size, x_start, Wstar, Win, Wbias, run_length, washout
 
         # If washout ended, save
         if t >= washout_length:
-            if dim == 0:
-                state_collector[:, t - washout_length] = x
-            else:
-                state_collector[t - washout_length, :] = x
-            # end if
+            state_collector[t - washout_length, :] = x
             pattern_collector[t - washout_length] = u
         # end if
     # end if
