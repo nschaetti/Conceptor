@@ -1,8 +1,8 @@
 # coding=utf-8
 #
-# File : __init__.py
-# Description : Reservoir and ESN tools
-# Date : 14th of October, 2019
+# File : quota.py
+# Description : Quota utility functions
+# Date : 15th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free
 # software: you can
@@ -21,16 +21,26 @@
 # Copyright Nils Schaetti, University of Neuchâtel <nils.schaetti@unine.ch>
 #
 
-
 # Imports
-from .free_run import free_run, free_run_input_simulation, free_run_input_recreation
-from .run import run
-from .states import timeshift
-from .training import ridge_regression, train_outputs, incremental_loading, incremental_training, loading
-from .weights import generate_internal_weights, from_matlab, load_matlab_file, scale_weights
+import numpy as np
+import numpy.linalg as lin
 
 
-# All
-__all__ = ['free_run', 'free_run_input_simulation', 'free_run_input_recreation', 'generate_internal_weights',
-           'incremental_loading', 'incremental_training', 'run', 'ridge_regression', 'train_outputs', 'from_matlab',
-           'load_matlab_file', 'scale_weights', 'loading', 'timeshift']
+# Compute quota of a matrix
+def quota(M):
+    """
+    Compute quota of a matrix
+    :param M: Square matrix (Nx x Nx)
+    :return: Matrix's quotas 0 <= quota <= 1
+    """
+    # Assert
+    assert isinstance(M, np.ndarray)
+    assert M.ndim == 2
+    assert M.shape[0] == M.shape[1]
+
+    # SVD the matrix
+    U, S, V = lin.svd(M)
+
+    # Average of singular values
+    return np.average(S)
+# end quota

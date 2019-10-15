@@ -24,6 +24,7 @@
 # Imports
 from .collector import Collector
 from .training import train
+from .quota import quota
 
 # ALL
-__all__ = ['Collector', 'train']
+__all__ = ['Collector', 'train', 'quota']

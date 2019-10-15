@@ -141,3 +141,111 @@ def plot_patterns_with_singular_values(truth_patterns, generated_patterns, Xs, S
     # Show figure
     plt.show()
 # end plot_patterns_with_singular_values
+
+
+# Plot original and generated patterns on the same plot, with informations
+def plot_patterns_with_infos(original_patterns, generated_patterns, gauge, info1, info2, title):
+    """
+    Plot original and generated patterns on the same plot, with informations
+    :param original_patterns: Original patterns (#patterns x length)
+    :param generated_patterns: Generated patterns (#patterns x length)
+    :param gauge: A gauge to dislay at the back of the plots (length)
+    :param info1: First info to display, numbers (#patterns)
+    :param info2: Second info to display, numbers (#patterns)
+    :param title: Plot's title.
+    """
+    # how many patterns
+    n_patterns = original_patterns.shape[0]
+    pattern_length = original_patterns.shape[1]
+
+    # Figure (square size)
+    plt.figure(figsize=(16, 4 * n_patterns))
+
+    # Plot index
+    plot_index = 0
+
+    # Gauge length
+    gauge_length = gauge.shape[0]
+
+    # For each pattern
+    for p in range(n_patterns):
+        # Plot 1 : original pattern and recreated pattern
+        plt.subplot(4, 4, plot_index + 1)
+        plot_index += 1
+
+        # Plot singular values of A
+        plt.fill_between(
+            # np.linspace(0, pattern_length, n_plot_singular_values),
+            # 2.0 * Sx - 1.0,
+            np.linspace(0, pattern_length, gauge_length),
+            2.0 * gauge - 1.0,
+            -1,
+            color='red',
+            alpha=0.75
+        )
+
+        # Plot generated pattern and original
+        plt.plot(generated_patterns[p], color='lime', linewidth=10)
+        plt.plot(original_patterns[p], color='black', linewidth=1.5)
+
+        # Square properties
+        plot_width = pattern_length
+        plot_bottom = -1
+        plot_top = 1
+        props = dict(boxstyle='square', facecolor='white', alpha=0.75)
+
+        # Pattern number
+        plt.text(
+            plot_width - 0.7,
+            plot_top - 0.1,
+            "p = {}".format(original_patterns[p]),
+            fontsize=14,
+            verticalalignment='top',
+            horizontalalignment='right',
+            bbox=props
+        )
+
+        # Info 1
+        plt.text(
+            plot_width - 0.7,
+            plot_bottom + 0.1,
+            round(info1[p], 4),
+            fontsize=14,
+            verticalalignment='bottom',
+            horizontalalignment='right',
+            bbox=props
+        )
+
+        # Info 2
+        plt.text(
+            0.7,
+            plot_bottom + 0.1,
+            round(info2[p], 2),
+            fontsize=14,
+            verticalalignment='bottom',
+            horizontalalignment='left',
+            bbox=props
+        )
+
+        # Title
+        if p == 0:
+            plt.title(title)
+        # end if
+
+        # X labels
+        if p == 3:
+            plt.xticks([0, pattern_length / 2.0, pattern_length])
+        else:
+            plt.xticks([0, pattern_length / 2.0, pattern_length])
+        # end if
+
+        # Y limits
+        plt.ylim([-1, 1])
+        plt.xlim([0, pattern_length])
+        plt.yticks([-1, 0, 1])
+    # end for
+
+    # Show figure
+    plt.show()
+# end plot_patterns_with_infos
+

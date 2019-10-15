@@ -127,9 +127,6 @@ Wstar, Win, Wbias = Conceptors.reservoir.scale_weights(
     bias_scaling=bias_scaling
 )
 
-# Identity matrix
-# I = np.eye(reservoir_size)
-
 # Number of patterns
 n_patterns = len(patterns)
 

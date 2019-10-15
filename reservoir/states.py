@@ -1,8 +1,8 @@
 # coding=utf-8
 #
-# File : __init__.py
-# Description : Reservoir and ESN tools
-# Date : 14th of October, 2019
+# File : states.py
+# Description : States utility functions.
+# Date : 15th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free
 # software: you can
@@ -21,16 +21,29 @@
 # Copyright Nils Schaetti, University of Neuchâtel <nils.schaetti@unine.ch>
 #
 
-
 # Imports
-from .free_run import free_run, free_run_input_simulation, free_run_input_recreation
-from .run import run
-from .states import timeshift
-from .training import ridge_regression, train_outputs, incremental_loading, incremental_training, loading
-from .weights import generate_internal_weights, from_matlab, load_matlab_file, scale_weights
+import numpy as np
 
 
-# All
-__all__ = ['free_run', 'free_run_input_simulation', 'free_run_input_recreation', 'generate_internal_weights',
-           'incremental_loading', 'incremental_training', 'run', 'ridge_regression', 'train_outputs', 'from_matlab',
-           'load_matlab_file', 'scale_weights', 'loading', 'timeshift']
+# Compute timeshifted states
+def timeshift(X, temp_dif):
+    """
+    Compute timeshifted states.
+    :param X: States (Nx x Length)
+    :param temp_dif: Time steps.
+    :return: Timeshifted reservoir states.
+    """
+    # Dimensions
+    reservoir_size = X.shape[0]
+    length = X.shape[1]
+
+    # Init.
+    Xshifted = np.zeros((reservoir_size, length))
+
+    # Time shifted states
+    if temp_dif < 0:
+        Xshifted[:, -temp_dif:] = X[:, :temp_dif]
+    else:
+        Xshifted[:, :-temp_dif] = X[:, temp_dif:]
+    # end if
+# end timeshift
