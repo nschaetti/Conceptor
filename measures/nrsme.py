@@ -26,23 +26,32 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 
-# Normalized root mean square rror
-def nrmse(output, target, norm="sd"):
+# Normalized Root Mean Square Error
+def nrmse(predicted, target, norm="sd", axis=1):
     """
-    Compute normalized root mean square error.
-    :param output: time series
-    :param target: time series
-    :param norm: sd or maxmin
-    :return: normalized mean root sqaure error
+    Compute normalized root mean square error. If timeseries if more than 1-D, NRMSE is averaged over dimensions.
+    :param predicted: Predicted timeseries (Dim x timeseries length)
+    :param target: True timeseries (Dim x timeseries length)
+    :param norm: Which norm to use (sd or maxmin)
+    :return: Normalized Root Mean Square Error
     """
+    # Assert types
+    assert isinstance(predicted, np.ndarray)
+    assert isinstance(target, np.ndarray)
+
+    # Assert dim
+    assert predicted.ndim == 2
+    assert target.ndim == 2
+
+    # Norm
     if norm == "maxmin":
-        return np.divide(
-            np.sqrt(np.average(np.power(output - target, 2), axis=1)),
-            np.max(target, axis=1) - np.min(target, axis=1)
-        )
+        return np.average(np.divide(
+            np.sqrt(np.average(np.power(predicted - target, 2), axis=axis)),
+            np.max(target, axis=axis) - np.min(target, axis=axis)
+        ))
     else:
-        combined_var = 0.5 * (np.var(target, ddof=1, axis=1) + np.var(output, ddof=1, axis=1))
-        return np.sqrt(np.divide(np.average(np.power(output - target, 2), axis=1), combined_var))
+        combined_var = 0.5 * (np.var(target, ddof=1, axis=axis) + np.var(predicted, ddof=1, axis=axis))
+        return np.average(np.sqrt(np.divide(np.average(np.power(predicted - target, 2), axis=axis), combined_var)))
     # end if
 # end nrmse
 
