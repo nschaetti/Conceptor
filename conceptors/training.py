@@ -1,7 +1,7 @@
 # coding=utf-8
 #
 # File : training.py
-# Description : Functions to train conceptors
+# Description : Functions to train Conceptors
 # Date : 14th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free
@@ -32,11 +32,21 @@ import numpy.linalg as lin
 def train(X, aperture, dim=0):
     """
     Train a conceptor
-    :param X: Reservoir states
-    :param aperture: Aperture
-    :param dim: Time dimension
-    :return: Trained conceptor matrix, Normalized singular values, Singular values, Correlation matrix
+    :param X: Reservoir states (serie length x reservoir size OR reservoir size x serie length)
+    :param aperture: Aperture (>= 0)
+    :param dim: Position of the temporal dimension.
+    :return: Trained conceptor matrix C, Normalized singular values Snorm, Singular values Sorg, Correlation matrix R
     """
+    # Assert type
+    assert isinstance(X, np.ndarray)
+    assert isinstance(aperture, float) or isinstance(aperture, int)
+    assert isinstance(dim, int)
+
+    # Assert dimension and value
+    assert X.ndim == 2
+    assert aperture >= 0
+    assert dim == 0 or dim == 1
+
     # Learn length
     if dim == 0:
         learn_length = X.shape[0]
@@ -45,6 +55,11 @@ def train(X, aperture, dim=0):
         learn_length = X.shape[1]
         reservoir_size = X.shape[0]
     # end if
+
+    # Assert learn length and
+    # reservoir size.
+    assert learn_length > 0
+    assert reservoir_size > 0
 
     # CoRrelation matrix of reservoir states
     if dim == 0:
