@@ -314,22 +314,22 @@ rp_74 = 1.8 * (rp_74 - minVal) / (maxVal - minVal) - 0.9
 patts.append(lambda n: rp_74[n % 8])
 
 # Pattern 75
-random_period12 = np.array([1.0, -0.1, -1.0, 0.7, 0.85, -0.5, -0.1, 0.0, 1.0, -1.0])
-max_val = np.max(random_period12)
-min_val = np.min(random_period12)
-random_period12 = 1.8 * (random_period12 - min_val) / (max_val - min_val) - 0.9
-patts.append(lambda n: random_period12[(n + 1) % 10])
+rp_75 = np.array([1.0, -0.1, -1.0, 0.7, 0.85, -0.5, -0.1, 0.0, 1.0, -1.0])
+max_val = np.max(rp_75)
+min_val = np.min(rp_75)
+rp_75 = 1.8 * (rp_75 - min_val) / (max_val - min_val) - 0.9
+patts.append(lambda n: rp_75[(n + 1) % 10])
 
 # Pattern 76
-random_period13 = np.array([-1.0, 1.0, 0.9, 0.75, 0.55, 0.85, 1.0])
-max_val = np.max(random_period13)
-min_val = np.min(random_period13)
-random_period13 = 1.8 * (random_period13 - min_val) / (max_val - min_val) - 0.9
-patts.append(lambda n: random_period13[(n + 1) % 7])
+rp_76 = np.array([-1.0, 1.0, 0.9, 0.75, 0.55, 0.85, 1.0])
+max_val = np.max(rp_76)
+min_val = np.min(rp_76)
+rp_76 = 1.8 * (rp_76 - min_val) / (max_val - min_val) - 0.9
+patts.append(lambda n: rp_76[(n + 1) % 7])
 
 # Pattern 77
-random_period16 = np.array([-1.0, -0.25, 0.1, -0.32, 1.0, 0.85, 0.35])
-max_val = np.max(random_period16)
-min_val = np.min(random_period16)
-random_period16 = 1.8 * (random_period16 - min_val) / (max_val - min_val) - 0.9
-patts.append(lambda n: random_period16[(n + 1) % 7])
+rp_77 = np.array([-1.0, -0.25, 0.1, -0.32, 1.0, 0.85, 0.35])
+max_val = np.max(rp_77)
+min_val = np.min(rp_77)
+rp_77 = 1.8 * (rp_77 - min_val) / (max_val - min_val) - 0.9
+patts.append(lambda n: rp_77[(n + 1) % 7])
