@@ -77,8 +77,13 @@ np.random.seed(seed)
 # Argument parsing
 parser = argparse.ArgumentParser(prog="subspace_demo", description=u"Fig. 1 BC subspace first demo")
 parser.add_argument("--w", type=str, default="", required=False)
+parser.add_argument("--w-name", type=str, default="", required=False)
 parser.add_argument("--win", type=str, default="", required=False)
+parser.add_argument("--win-name", type=str, default="", required=False)
 parser.add_argument("--wbias", type=str, default="", required=False)
+parser.add_argument("--wbias-name", type=str, default="", required=False)
+parser.add_argument("--x0", type=str, default="", required=False)
+parser.add_argument("--x0-name", type=str, default="", required=False)
 args = parser.parse_args()
 
 # Compute connectivity
@@ -107,7 +112,7 @@ else:
 
 # Load Wbias from matlab from or init randomly
 if args.wbias != "":
-    Wbias_raw = io.loadmat("data/params/WbiasRaw.mat")['WbiasRaw'].reshape(-1)
+    Wbias_raw = Conceptors.reservoir.load_matlab_file(args.wbias, args.wbias_name).reshape(-1)
 else:
     Wbias_raw = np.random.randn(reservoir_size)
 # end if
@@ -272,7 +277,12 @@ for p in range(n_patterns):
     C, _, _, _, _ = conceptor_collector.get(p)
 
     # Original starting state or get the original
-    x = 0.5 * np.random.randn(reservoir_size)
+    if args.x0 != "":
+        original_x = Conceptors.reservoir.load_matlab_file("{}{}.mat".format(args.x0, p + 1), args.x0_name)
+        x = original_x.reshape(reservoir_size)
+    else:
+        x = 0.5 * np.random.randn(reservoir_size)
+    # end if
 
     # Free run with the loaded reservoir
     test_states, test_output = Conceptors.reservoir.free_run(
@@ -351,6 +361,7 @@ for p1 in range(n_patterns):
         C1, U1, S1, _, _ = conceptor_collector.get(p1)
         C2, U2, S2, _, _ = conceptor_collector.get(p2)
 
+        # Cosine similarity on conceptor matrices
         similarity = Conceptors.measures.conceptor_cosine_similarity(
             C1=C1,
             U1=U1,
@@ -372,15 +383,15 @@ similarity_matrix_correlations = np.zeros((n_patterns, n_patterns))
 for p1 in range(n_patterns):
     for p2 in range(n_patterns):
         # Get conceptors
-        _, U1, S1, _, R1 = conceptor_collector.get(p1)
-        _, U2, S2, _, R2 = conceptor_collector.get(p2)
+        _, U1, _, S1, R1 = conceptor_collector.get(p1)
+        _, U2, _, S2, R2 = conceptor_collector.get(p2)
 
-        # Measure similarity
-        similarity = Conceptors.measures.conceptor_cosine_similarity(
-            C1=R1,
+        # Cosine similarity on correlation matrix
+        similarity = Conceptors.measures.generalized_cosine_similarity(
+            R1=R1,
             U1=U1,
             S1=S1,
-            C2=R2,
+            R2=R2,
             U2=U2,
             S2=S2
         )
@@ -413,47 +424,22 @@ plotting_singular_values_periodic = np.zeros((len(alphas), reservoir_size))
 # For each alpha value
 for i, a in enumerate(alphas):
     # Get correlation matrices
-    C1, _, _, _, _ = conceptor_collector.get(0)
-    C2, _, _, _, _ = conceptor_collector.get(2)
+    _, _, _, _, R1 = conceptor_collector.get(0)
+    _, _, _, _, R2 = conceptor_collector.get(2)
 
-    # Sine
-    """C1 = np.dot(R1, lin.inv(R1 + np.power(a, -2) * I))
-    U1, S1, V1 = lin.svd(C1)
-    plotting_singular_values_sine[i] = S1"""
-    C1 = Conceptors.logic.PHI(C1, a)
+    # Change aperture to a
+    C1 = np.dot(R1, lin.inv(R1 + np.power(a, -2) * np.eye(reservoir_size)))
     U1, S1, V1 = lin.svd(C1)
     plotting_singular_values_sine[i] = S1
 
-    # Periodic
-    """R2 = correlation_matrix_collectors[2]
-    C2 = np.dot(R2, lin.inv(R2 + np.power(a, -2) * I))
-    U2, S2, V2 = lin.svd(C2)
-    plotting_singular_values_periodic[i] = S2"""
-    C2 = Conceptors.logic.PHI(C2, a)
+    # Change aperture to
+    C2 = np.dot(R2, lin.inv(R2 + np.power(a, -2) * np.eye(reservoir_size)))
     U2, S2, V2 = lin.svd(C2)
     plotting_singular_values_periodic[i] = S2
 # end for
 
-# Figure (square size)
-plt.figure(figsize=(12, 4))
-
-# Plot sine singular values
-plt.subplot(1, 2, 1)
-for i in range(len(alphas)):
-    plt.plot(plotting_singular_values_sine[i], linewidth=2)
-# end for
-plt.title(u"Sine (pattern 1)")
-plt.yticks([0, 1])
-plt.ylim([0, 1.1])
-
-# Plot periodic
-plt.subplot(1, 2, 2)
-for i in range(len(alphas)):
-    plt.plot(plotting_singular_values_periodic[i], linewidth=2)
-# end for
-plt.yticks([0, 1])
-plt.ylim([0, 1.1])
-plt.title(u"10-periodic random (pattern 1)")
-
-# Show
-plt.show()
+# Compare singular values
+Conceptors.visualization.compare_singular_values(
+    singvalues1=plotting_singular_values_sine,
+    singvalues2=plotting_singular_values_periodic
+)
