@@ -31,7 +31,7 @@ import numpy.linalg as lin
 def generalized_cosine_similarity(R1, U1, S1, R2, U2, S2):
     """
     Generalized cosine similarity
-    :param R1: Correlation matrix 1
+    :param R1: Correlation matrix 1 (reservoir size x reservoir size)
     :param U1: Singular vectors 1
     :param S1: Singular values 2
     :param R2: Correlation matrix 2
