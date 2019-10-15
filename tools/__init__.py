@@ -22,7 +22,7 @@
 #
 
 # Imports
-from .interpolation import interpolation_alignment
+from .interpolation import interpolation_alignment_1d
 
 # ALL
-__all__ = ['interpolation_alignment']
+__all__ = ['interpolation_alignment_1d']

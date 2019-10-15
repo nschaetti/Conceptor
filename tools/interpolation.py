@@ -28,15 +28,14 @@ import numpy.linalg as lin
 
 
 # Interpolate and align two signals
-def interpolation_alignment(truth_pattern, generated_pattern, interpolation_rate, dim=0, kind='quadratic'):
+def interpolation_alignment_1d(truth_pattern, generated_pattern, interpolation_rate, kind='quadratic'):
     """
-    Interpolate and align two signals
-    :param truth_pattern:
-    :param generated_pattern:
-    :param interpolation_rate:
-    :param dim:
-    :param kind: Interpolation type
-    :return:
+    Interpolate and align two 1-D signals
+    :param truth_pattern: Original pattern with shape (LO)
+    :param generated_pattern: Generated pattern with shape (LG)
+    :param interpolation_rate: How many interpolation points?
+    :param kind: Interpolation type (linear, quadratic) (default=quadratic)
+    :return: The generated output aligned with the original (shape LG), the index in the original signal.
     """
     # Lengths
     truth_length = truth_pattern.shape[0]

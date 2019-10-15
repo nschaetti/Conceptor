@@ -164,8 +164,7 @@ class Test_Subspace_Demo(TestCase):
             # Train conceptor
             C, U, Snew, Sorg, R = Conceptors.conceptors.train(
                 X=state_collector,
-                aperture=alpha,
-                dim=1
+                aperture=alpha
             )
 
             # Save conceptor and singular values
@@ -190,8 +189,7 @@ class Test_Subspace_Demo(TestCase):
         Wout = Conceptors.reservoir.train_outputs(
             training_states=training_states,
             training_targets=training_targets,
-            ridge_param_wout=ridge_param_wout,
-            dim=1
+            ridge_param_wout=ridge_param_wout
         )
 
         # Compute training error (NRMSE)
@@ -202,15 +200,14 @@ class Test_Subspace_Demo(TestCase):
             X=training_states,
             Xold=training_states_old,
             Wbias=Wbias,
-            ridge_param=ridge_param_wstar,
-            dim=1
+            ridge_param=ridge_param_wstar
         )
 
         # Training errors per neuron
         NRMSE_W = Conceptors.measures.nrmse(np.dot(W, training_states_old), X_new)
 
         # Output states and signals
-        conceptor_test_states = np.zeros((n_patterns, conceptor_test_length, reservoir_size))
+        conceptor_test_states = np.zeros((n_patterns, reservoir_size, conceptor_test_length))
         conceptor_test_output = np.zeros((n_patterns, conceptor_test_length))
 
         # Now we generate signal but with conceptors
@@ -247,7 +244,7 @@ class Test_Subspace_Demo(TestCase):
 
         # Aligned results
         conceptor_test_output_aligned = np.zeros((n_patterns, signal_plot_length))
-        conceptor_test_states_aligned = np.zeros((n_patterns, signal_plot_length, 5))
+        conceptor_test_states_aligned = np.zeros((n_patterns, 5, signal_plot_length))
 
         # Measured performances
         NRMSE_aligned = np.zeros(n_patterns)
@@ -256,15 +253,14 @@ class Test_Subspace_Demo(TestCase):
         # For each pattern
         for p in range(n_patterns):
             # Interpolate and align truth and generated
-            aligned_ouputs, max_ind = Conceptors.tools.interpolation_alignment(
+            aligned_ouputs, max_ind = Conceptors.tools.interpolation_alignment_1d(
                 truth_pattern=plotting_patterns[p],
                 generated_pattern=conceptor_test_output[p],
-                interpolation_rate=interpolation_rate,
-                dim=1
+                interpolation_rate=interpolation_rate
             )
 
             # Get aligned states
-            conceptor_test_states_aligned[p] = conceptor_test_states[p, max_ind:max_ind + signal_plot_length, :5]
+            conceptor_test_states_aligned[p] = conceptor_test_states[p, :5, max_ind:max_ind + signal_plot_length]
 
             # Save aligned outputs
             conceptor_test_output_aligned[p] = aligned_ouputs

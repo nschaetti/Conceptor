@@ -1,7 +1,7 @@
 # coding=utf-8
 #
-# File : interpolation.py
-# Description : Interpolation and alignment.
+# File : __init__.py
+# Description : Visualization sub-package.
 # Date : 14th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free

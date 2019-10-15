@@ -30,16 +30,33 @@ import matplotlib.pyplot as plt
 def plot_patterns_with_singular_values(truth_patterns, generated_patterns, Xs, SVs, color_truth='b', color_generated='r', title='p and y'):
     """
     Plot original and generated patterns with singular values and reservoir states.
-    :param truth_patterns: Original patterns
-    :param generated_patterns: Generated patterns
-    :param Xs: Reservoir states
-    :param SVs: Singular values
+    :param truth_patterns: Original patterns (#patterns x L)
+    :param generated_patterns: Generated patterns (#patterns x L)
+    :param Xs: Reservoir states limited to 3 neurons (#patterns x 3)
+    :param SVs: Singular values (Nx)
     :param color_truth: Color line of the original signal
     :param color_generated: Color line of the generated signal
     :param title: Plot title
     """
+    # Assert types
+    assert isinstance(truth_patterns, np.ndarray)
+    assert isinstance(generated_patterns, np.ndarray)
+    assert isinstance(Xs, np.ndarray)
+    assert isinstance(SVs, np.ndarray)
+    assert isinstance(color_truth, str)
+    assert isinstance(color_generated, str)
+    assert isinstance(title, str)
+
+    # Assert dimension
+    assert truth_patterns.ndim == 2
+    assert generated_patterns.ndim == 2
+    assert Xs.ndim == 3
+
     # N. patterns
     n_patterns = truth_patterns.shape[0]
+
+    # Assert
+    assert n_patterns > 0
 
     # Figure (square size)
     plt.figure(figsize=(16, 2 * n_patterns))

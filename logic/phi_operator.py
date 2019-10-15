@@ -32,7 +32,7 @@ from scipy.linalg import svd
 def PHI(C, gamma):
     """
     Aperture adaptation of conceptor C by factor gamma where 0 <= gamma <= Inf.
-    :param C: Conceptor matrix (reservoir size x reservoir size)
+    :param C: Conceptor matrix (Nx x Nx)
     :param gamma: Multiplication factor (0 <= gamma <= Inf)
     :return: C with aperture multiplied by gamma
     """

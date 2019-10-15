@@ -61,7 +61,7 @@ def run(pattern, reservoir_size, x_start, Wstar, Win, Wbias, run_length, washout
     assert Wstar.shape[0] == Wstar.shape[1]
 
     # State collector
-    state_collector = np.zeros((run_length, reservoir_size))
+    state_collector = np.zeros((reservoir_size, run_length))
 
     # Pattern collector
     pattern_collector = np.zeros(run_length)
@@ -80,7 +80,7 @@ def run(pattern, reservoir_size, x_start, Wstar, Win, Wbias, run_length, washout
 
         # If washout ended, save
         if t >= washout_length:
-            state_collector[t - washout_length, :] = x
+            state_collector[:, t - washout_length] = x
             pattern_collector[t - washout_length] = u
         # end if
     # end if

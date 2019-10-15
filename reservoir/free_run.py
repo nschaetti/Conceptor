@@ -199,7 +199,7 @@ def free_run_input_recreation(x_start, W, R, Win, Wbias, Wout, C, run_length, wa
     assert C is None or C.shape[0] == C.shape[1]
 
     # Test states and outputs
-    run_states = np.zeros((run_length, W.shape[0]))
+    run_states = np.zeros((W.shape[0], run_length))
     run_outputs = np.zeros(run_length)
 
     # Reservoir initial state
@@ -218,7 +218,7 @@ def free_run_input_recreation(x_start, W, R, Win, Wbias, Wout, C, run_length, wa
 
         # Save states and outputs if outside washout
         if t >= washout_length:
-            run_states[t - washout_length, :] = x
+            run_states[:, t - washout_length] = x
             run_outputs[t - washout_length] = np.dot(Wout, x)
         # end if
     # end for
