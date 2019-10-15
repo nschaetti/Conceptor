@@ -27,21 +27,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-# Plot to sets of singular values side by side.
+# Plot two sets of singular values side by side.
 def compare_singular_values(singvalues1, singvalues2, title1, title2):
     """
     Plot to sets of singular values side by side.
-    :param singvalues1: First set of singular values.
-    :param singvalues2: Second set of singular values.
+    :param singvalues1: First set of singular values (#sets x #SV).
+    :param singvalues2: Second set of singular values (#sets x #SV).
     :param title1: First plot's title
     :param title2: Second plot's title
     """
     # Assert
     assert isinstance(singvalues1, np.ndarray)
     assert isinstance(singvalues2, np.ndarray)
-    print(singvalues1.shape)
-    assert singvalues1.ndim == 1
-    assert singvalues2.ndim == 1
+    assert singvalues1.ndim == 2
+    assert singvalues2.ndim == 2
+    assert singvalues1.shape[1] == singvalues2.shape[1]
 
     # Figure (square size)
     plt.figure(figsize=(12, 4))
