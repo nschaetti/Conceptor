@@ -46,4 +46,6 @@ def timeshift(X, temp_dif):
     else:
         Xshifted[:, :-temp_dif] = X[:, temp_dif:]
     # end if
+
+    return Xshifted
 # end timeshift

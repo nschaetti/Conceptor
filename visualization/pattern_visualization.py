@@ -164,21 +164,21 @@ def plot_patterns_with_infos(original_patterns, generated_patterns, gauge, info1
     # Plot index
     plot_index = 0
 
-    # Gauge length
-    gauge_length = gauge.shape[0]
-
     # For each pattern
     for p in range(n_patterns):
         # Plot 1 : original pattern and recreated pattern
         plt.subplot(4, 4, plot_index + 1)
         plot_index += 1
 
+        # Gauge length
+        gauge_length = gauge.shape[1]
+
         # Plot singular values of A
         plt.fill_between(
             # np.linspace(0, pattern_length, n_plot_singular_values),
             # 2.0 * Sx - 1.0,
             np.linspace(0, pattern_length, gauge_length),
-            2.0 * gauge - 1.0,
+            2.0 * gauge[p] - 1.0,
             -1,
             color='red',
             alpha=0.75
@@ -198,7 +198,7 @@ def plot_patterns_with_infos(original_patterns, generated_patterns, gauge, info1
         plt.text(
             plot_width - 0.7,
             plot_top - 0.1,
-            "p = {}".format(original_patterns[p]),
+            "p = {}".format(p+1),
             fontsize=14,
             verticalalignment='top',
             horizontalalignment='right',

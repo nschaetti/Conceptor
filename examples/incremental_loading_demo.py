@@ -146,7 +146,8 @@ quota_A = np.zeros(n_patterns)
 quota_C = np.zeros(n_patterns)
 
 # Save C(all)
-A_collectors = np.zeros((n_patterns, reservoir_size, reservoir_size))
+# A_collectors = np.zeros((n_patterns, reservoir_size, reservoir_size))
+A_SVs_collectors = np.zeros((n_patterns, reservoir_size))
 
 # Save states
 state_collectors = np.zeros((n_patterns, reservoir_size, learn_length))
@@ -225,15 +226,16 @@ for p in range(n_patterns):
         P=pattern_collector,
         A=conceptor_collector.A(),
         ridge_param=ridge_param_wout,
-        training_length=learn_length,
-        reservoir_size=reservoir_size
+        training_length=learn_length
     )
 
     # Disjonction of all conceptor
     A = conceptor_collector.A()
 
     # Save A
-    A_collectors[p] = A
+    # A_collectors[p] = A
+    AU, AS, AV = lin.svd(A)
+    A_SVs_collectors[p] = AS
 
     # Quota of loaded reservoir
     quota_A[p] = Conceptors.conceptors.quota(A)
@@ -244,7 +246,7 @@ for p in range(n_patterns):
 
 # Now we generate signal but with conceptors
 # Save states and outputs
-conceptor_test_states = np.zeros((n_patterns, 5, conceptor_test_length))
+conceptor_test_states = np.zeros((n_patterns, reservoir_size, conceptor_test_length))
 conceptor_test_output = np.zeros((n_patterns, conceptor_test_length))
 
 # For each pattern
@@ -259,9 +261,10 @@ for p in range(n_patterns):
     x = np.random.randn(reservoir_size)
 
     # Free run with the loaded reservoir
-    test_states, test_output = Conceptors.reservoir.free_run(
+    test_states, test_output = Conceptors.reservoir.free_run_input_simulation(
         x_start=x,
-        W=W,
+        W=Wstar,
+        D=D,
         Wbias=Wbias,
         Wout=Wout,
         C=C,
@@ -315,86 +318,12 @@ print(u"NRMSE aligned : {}".format(NRMSE_aligned))
 print(u"MSE aligned : {}".format(MSE_aligned))
 print(u"Average MSE : {}".format(np.average(NRMSE_aligned)))
 
-# Figure (square size)
-plt.figure(figsize=(16, 16))
-
-# Plot index
-plot_index = 0
-
-# For each pattern
-for p in range(n_patterns):
-    # Plot 1 : original pattern and recreated pattern
-    plt.subplot(4, 4, plot_index + 1)
-    plot_index += 1
-
-    # C(all) after learning the pattern
-    all_conceptor = all_conceptors[p]
-    Ux, Sx, Vx = svd(all_conceptor)
-
-    # Plot singular values of C(all)
-    # plt.fill(np.linspace(0, signal_plot_length, n_plot_singular_values), 2.0 * Sx - 1.0, color='red', alpha=0.75)
-    plt.fill_between(np.linspace(0, signal_plot_length, n_plot_singular_values), 2.0 * Sx - 1.0, -1, color='red', alpha=0.75)
-
-    # Plot generated pattern and original
-    plt.plot(conceptor_test_output_aligned[p], color='lime', linewidth=10)
-    plt.plot(plotting_patterns[p], color='black', linewidth=1.5)
-
-    # Square properties
-    plot_width = signal_plot_length
-    plot_bottom = -1
-    plot_top = 1
-    props = dict(boxstyle='square', facecolor='white', alpha=0.75)
-
-    # Pattern number
-    plt.text(plot_width - 0.7, plot_top - 0.1, u"p = {}".format(patterns[p]), fontsize=14, verticalalignment='top', horizontalalignment='right', bbox=props)
-
-    # Aligned NRMSE
-    plt.text(plot_width - 0.7, plot_bottom + 0.1, round(NRMSE_aligned[p], 4), fontsize=14, verticalalignment='bottom', horizontalalignment='right', bbox=props)
-
-    # Show C(all) size
-    plt.text(0.7, plot_bottom + 0.1, round(sizes_call[p], 2), fontsize=14, verticalalignment='bottom', horizontalalignment='left', bbox=props)
-
-    # Title
-    if p == 0:
-        plt.title(u'p and y')
-    # end if
-
-    # X labels
-    if p == 3:
-        plt.xticks([0, signal_plot_length / 2.0, signal_plot_length])
-    else:
-        plt.xticks([0, signal_plot_length / 2.0, signal_plot_length])
-    # end if
-
-    # Y limits
-    plt.ylim([-1, 1])
-    plt.xlim([0, signal_plot_length])
-    plt.yticks([-1, 0, 1])
-# end for
-
-# Show figure
-plt.show()
-
-# Learn type 3
-if learn_type == 3:
-    # Figure (square size)
-    plt.figure(figsize=(16, 16))
-
-    # Plot index
-    plot_index = 0
-
-    # For each pattern
-    for p in range(n_patterns):
-        # Select subplot
-        plt.subplot(4, 4, plot_index + 1)
-        plot_index += 1
-
-        # Plot
-        plt.plot(np.log10(error_plot_smooth_rate[p, :]))
-
-        # Title
-        if p == 0:
-            plt.title(u"log10 se")
-        # end if
-    # end for
-# end if
+# Plot pattern regenerated with quota and NRMSE
+Conceptors.visualization.plot_patterns_with_infos(
+    original_patterns=plotting_patterns,
+    generated_patterns=conceptor_test_output_aligned,
+    gauge=A_SVs_collectors,
+    info1=NRMSE_aligned,
+    info2=quota_A,
+    title="p and y"
+)

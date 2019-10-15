@@ -22,10 +22,10 @@
 #
 
 # Imports
-from .pattern_visualization import plot_patterns_with_singular_values
+from .pattern_visualization import plot_patterns_with_singular_values, plot_patterns_with_infos
 from .similarities import plot_similarity_matrix
 from .plotting import compare_singular_values, plot_singular_values
 
 # ALL
 __all__ = ['plot_patterns_with_singular_values', 'plot_similarity_matrix', 'compare_singular_values',
-           'plot_singular_values']
+           'plot_singular_values', 'plot_patterns_with_infos']

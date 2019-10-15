@@ -126,51 +126,59 @@ def incremental_loading(D, X, P, Win, A, aperture, training_length):
     Incremental loading of a reservoir.
     NOT YET TESTED.
     :param D: Current input simulation matrix (Nx x Nx)
-    :param X: Training states (??)
-    :param P: Original pattern (??)
+    :param X: Training states (Nx x Length)
+    :param P: Original pattern (1 x Length)
     :param Win: Input weight matrix
     :param A: Current disjonction of all conceptors loaded
     :param training_length: Training length
     :return: The new input simulation matrix D
     """
+    # Reservoir size
+    reservoir_size = X.shape[0]
+
     # Compute D increment
-    Td = np.dot(Win, P.reshape(1, -1)) - np.dot(D, X)
+    Td = Win @ P.reshape(1, -1) - D @ X
 
     # The linear subspace of the reservoir state space that are not yet
     # occupied by any pattern.
     F = NOT(A)
 
+    # Filter old state to get only what is new
+    S_old = F @ X
+
     # Compute the increment for matrix D
-    S_old = np.dot(F, X)
-    Dinc = (
+    Dinc = (lin.pinv(S_old @ S_old.T / training_length + math.pow(aperture, -2) * np.eye(reservoir_size)) @ S_old @ Td.T) / training_length
+    """Dinc = (
             np.dot(
                 np.dot(
                     lin.pinv(
-                        np.dot(S_old, S_old.T) / training_length + math.pow(aperture, -2) * np.eye(Nx)
+                        np.dot(S_old, S_old.T) / training_length + math.pow(aperture, -2) * np.eye(reservoir_size)
                     ),
                     S_old
                 ),
                 Td.T
             ) / training_length
-    ).T
+    ).T"""
 
     return D + Dinc
 # end incremental_loading
 
 
 # Incremental training
-def incremental_training(Wout, X, P, A, ridge_param, training_length, reservoir_size):
+def incremental_training(Wout, X, P, A, ridge_param, training_length):
     """
     Incremental training of output weights.
     NOT YET TESTED.
-    :param Wout: Current Wout
-    :param X: Training states.
-    :param P: Training pattern.
+    :param Wout: Current Wout (Ny x Nx)
+    :param X: Training states (Nx x Length).
+    :param P: Training pattern (1 x Length).
     :param ridge_param: Regularisation parameter.
     :param training_length: Training length
-    :param reservoir_size: Reservoir size
     :return: Incremented Wout
     """
+    # Reservoir size
+    reservoir_size = X.shape[0]
+
     # Compute Wout
     Tout = P - Wout @ X
 
@@ -178,12 +186,12 @@ def incremental_training(Wout, X, P, A, ridge_param, training_length, reservoir_
     # occupied by any pattern.
     F = NOT(A)
 
-    # ...
+    # Filter training states to get what is new
     S = F @ X
 
-    # Compute incremente for Wout
+    # Compute increment for Wout
     Wout_inc = (
-            (pinv(S @ S.T / training_length + ridge_param * np.eye(Nx)) @ S @ Tout.T) / training_length
+            (pinv(S @ S.T / training_length + ridge_param * np.eye(reservoir_size)) @ S @ Tout.T) / training_length
     ).T
 
     # Update Wout
