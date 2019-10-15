@@ -1,7 +1,7 @@
 # coding=utf-8
 #
-# File : and.py
-# Description : AND in Conceptor Logic
+# File : or_operator.py
+# Description : OR in Conceptor Logic
 # Date : 14th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free
@@ -23,18 +23,27 @@
 
 
 # Imports
+import numpy as np
 from .and_operator import AND
 from .not_operator import NOT
 
 
-# R OR Q
+# OR in Conceptor Logic
 def OR(R, Q):
     """
-    R OR Q
-    :param R:
-    :param Q:
-    :return:
+    OR in Conceptor Logic
+    :param R: First conceptor operand (reservoir size x reservoir size)
+    :param Q: Second conceptor operand (reservoir size x reservoir size)
+    :return: R OR Q
     """
+    # Assert type
+    assert isinstance(R, np.ndarray)
+    assert isinstance(Q, np.ndarray)
+    assert R.ndim == 2
+    assert Q.ndim == 2
+
+    # R OR Q
     RorQ = NOT(AND(NOT(R), NOT(Q)))
+
     return RorQ
 # end OR

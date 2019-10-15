@@ -1,7 +1,7 @@
 # coding=utf-8
 #
-# File : and.py
-# Description : AND in Conceptor Logic
+# File : not_operator.py
+# Description : NOT in Conceptor Logic
 # Date : 14th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free
@@ -21,20 +21,25 @@
 # Copyright Nils Schaetti, University of Neuchâtel <nils.schaetti@unine.ch>
 #
 
-
 # Imports
 import numpy as np
 
 
-# NOT
+# NOT operator in Conceptor Logic
 def NOT(R):
     """
-    NOT R
-    :param R:
+    NOT operator in Conceptor Logic
+    :param R: Matrix operand (reservoir size x reservoir size
     :return:
     """
+    # Assert R
+    assert isinstance(R, np.ndarray)
+    assert R.ndim == 2
+
     # NOT => I - R
     dim = R.shape[0]
+    assert dim > 0
     notR = np.eye(dim) - R
+
     return notR
 # end NOT

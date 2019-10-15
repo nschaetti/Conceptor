@@ -1,6 +1,6 @@
 # coding=utf-8
 #
-# File : and.py
+# File : and_operator.py
 # Description : AND in Conceptor Logic
 # Date : 14th of October, 2019
 #
@@ -29,11 +29,19 @@ import numpy.linalg as lin
 # C AND B
 def AND(C, B):
     """
-    C AND B
-    :param C:
-    :param B:
-    :return:
+    AND operator in conceptor logic
+    :param C: First matrix (reservoir size x reservoir size)
+    :param B: Second matrix (reservoir size x reservoir size)
+    :return: C AND B (reservoir size x reservoir size)
     """
+    # Assert type
+    assert isinstance(C, np.ndarray)
+    assert isinstance(B, np.ndarray)
+
+    # Assert dimension
+    assert C.ndim == 2
+    assert B.ndim == 2
+
     # Dimension
     dim = C.shape[0]
     tol = 1e-14
@@ -55,7 +63,8 @@ def AND(C, B):
     UB0 = UB[:, numRankB:]
 
     # SVD on UC0 + UB0
-    (W, Sigma, Wt) = lin.svd(np.dot(UC0, UC0.T) + np.dot(UB0, UB0.T))
+    # (W, Sigma, Wt) = lin.svd(np.dot(UC0, UC0.T) + np.dot(UB0, UB0.T))
+    (W, Sigma, Wt) = lin.svd(UC0 @ UC0.T + UB0 @ UB0.T)
 
     # Number of non-zero SV
     numRankSigma = int(sum(1.0 * (Sigma > tol)))
@@ -65,21 +74,13 @@ def AND(C, B):
 
     # C and B
     # Wgk * (Wgk^T * (C^-1 + B^-1 - I) * Wgk)^-1 * Wgk^T
-    CandB = np.dot(
-        np.dot(
-            Wgk,
-            lin.inv(
-                np.dot(
-                    np.dot(
-                        Wgk.T,
-                        (lin.pinv(C, tol) + lin.pinv(B, tol) - np.eye(dim))
-                    ),
-                    Wgk
-                )
-            )
-        ),
-        Wgk.T
-    )
+    CandB = Wgk @ lin.inv(Wgk.T @ (lin.pinv(C, tol) + lin.pinv(B, tol) - np.eye(dim)) @ Wgk) @ Wgk.T
+
+    # Assert outout
+    assert isinstance(CandB, np.ndarray)
+    assert CandB.ndim == 2
+    assert CandB.shape == C.shape
+    assert CandB.shape == B.shape
 
     return CandB
 # end AND

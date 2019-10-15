@@ -1,7 +1,7 @@
 # coding=utf-8
 #
-# File : and.py
-# Description : AND in Conceptor Logic
+# File : __init__.py
+# Description : Conceptor Logic sub-package
 # Date : 14th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free

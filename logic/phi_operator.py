@@ -1,7 +1,7 @@
 # coding=utf-8
 #
-# File : and.py
-# Description : AND in Conceptor Logic
+# File : phi_operator.py
+# Description : Aperture multiplication in Conceptor Logic
 # Date : 14th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free
@@ -32,10 +32,18 @@ from scipy.linalg import svd
 def PHI(C, gamma):
     """
     Aperture adaptation of conceptor C by factor gamma where 0 <= gamma <= Inf.
-    :param C:
-    :param gamma:
-    :return:
+    :param C: Conceptor matrix (reservoir size x reservoir size)
+    :param gamma: Multiplication factor (0 <= gamma <= Inf)
+    :return: C with aperture multiplied by gamma
     """
+    # Assert type
+    assert isinstance(C, np.ndarray)
+    assert isinstance(gamma, float) or isinstance(gamma, int)
+
+    # Dim and value
+    assert C.ndim == 2
+    assert gamma >= 0 and gamma <= float("inf")
+
     # Dimension
     dim = C.shape[0]
 
@@ -44,14 +52,15 @@ def PHI(C, gamma):
         (U, S, V) = svd(C)
         Sdiag = S
         Sdiag[Sdiag < 1] = np.zeros((sum(Sdiag < 1), 1))
-        Cnew = np.dot(np.dot(U, np.diag(Sdiag)), U.T)
+        Cnew = U @ np.diag(Sdiag) @ U.T
     elif gamma == float("inf"):
         (U, S, V) = svd(C)
         Sdiag = S
         Sdiag[Sdiag > 0] = np.ones(sum(Sdiag > 0), 1)
-        Cnew = np.dot(np.dot(U, np.diag(Sdiag)), U.T)
+        Cnew = U @ np.diag(Sdiag) @ U.T
     else:
-        Cnew = np.dot(C, lin.inv(C + math.pow(gamma, -2) * (np.eye(dim) - C)))
+        Cnew = C @ lin.inv(C + math.pow(gamma, -2) * (np.eye(dim) - C))
     # end
+
     return Cnew
 # end PHI
