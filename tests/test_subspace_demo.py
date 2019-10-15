@@ -402,7 +402,7 @@ class Test_Subspace_Demo(TestCase):
         self.assertEqual(NRMSE_pattern.shape[0], 4, msg="Pattern NRMSE not containing four measures")
 
         # True NRMSEs
-        true_NRMSEs = np.ndarray([0.0079004, 0.00646076, 0.03286722, 0.00665655])
+        true_NRMSEs = np.array([0.0079004, 0.00646076, 0.03286722, 0.00665655])
 
         # Check NRMSE W
         for i in range(NRMSE_pattern.shape[0]):
