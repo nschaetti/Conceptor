@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # File : gcs.py
-# Description : Generalized cosine similarities
+# Description : Cosine similarities
 # Date : 14th of october, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free
@@ -32,15 +32,42 @@ def generalized_cosine_similarity(R1, U1, S1, R2, U2, S2):
     """
     Generalized cosine similarity
     :param R1: Correlation matrix 1 (reservoir size x reservoir size)
-    :param U1: Singular vectors 1
-    :param S1: Singular values 2
-    :param R2: Correlation matrix 2
-    :param U2: Singular vectors 2
-    :param S2: Singular values 2
-    :return: Generalized cosine similarity
+    :param U1: Singular vectors 1 (reservoir size x reservoir size)
+    :param S1: Singular values 2 (reservoir size)
+    :param R2: Correlation matrix 2 (reservoir size x reservoir size)
+    :param U2: Singular vectors 2 (reservoir size x reservoir size)
+    :param S2: Singular values 2 (reservoir size)
+    :return: Generalized cosine similarity (float) 0 <= similarity <= 1.0
     """
+    # Assert types
+    assert isinstance(R1, np.ndarray)
+    assert isinstance(U1, np.ndarray)
+    assert isinstance(S1, np.ndarray)
+    assert isinstance(R2, np.ndarray)
+    assert isinstance(U2, np.ndarray)
+    assert isinstance(S2, np.ndarray)
+
+    # Assert dimensions
+    assert R1.ndim == 2
+    assert U1.ndim == 2
+    assert S1.ndim == 1
+    assert R2.ndim == 2
+    assert U2.ndim == 2
+    assert S2.ndim == 1
+
+    # Square matrix
+    assert R1.shape[0] == R1.shape[1]
+    assert U1.shape[0] == U1.shape[1]
+    assert R2.shape[0] == R2.shape[1]
+    assert U2.shape[0] == U2.shape[1]
+
     # Similarity
-    return math.pow(lin.norm(((np.sqrt(np.diag(S1)) @ U1.T) @ U2) @ np.sqrt(np.diag(S2)), 'fro'), 2) / (lin.norm(R1, 'fro') * lin.norm(R2, 'fro'))
+    similarity = math.pow(lin.norm(((np.sqrt(np.diag(S1)) @ U1.T) @ U2) @ np.sqrt(np.diag(S2)), 'fro'), 2) / (lin.norm(R1, 'fro') * lin.norm(R2, 'fro'))
+
+    # Assert result
+    assert similarity >= 0 and similarity <= float('inf')
+
+    return similarity
 # end generalized_cosine_similarity
 
 
@@ -48,13 +75,41 @@ def generalized_cosine_similarity(R1, U1, S1, R2, U2, S2):
 def conceptor_cosine_similarity(C1, U1, S1, C2, U2, S2):
     """
     Generalized cosine similarity
-    :param C1: Conceptor 1
-    :param U1: Singular vectors 1
-    :param S1: Singular values 1
-    :param C2: Conceptor 2
-    :param U2: Singular vectors 2
-    :param S2: Singular values 2
-    :return: Generalized cosine similarity
+    :param C1: Conceptor 1 (reservoir size x reservoir size)
+    :param U1: Singular vectors 1 (reservoir size x reservoir size)
+    :param S1: Singular values 1 (reservoir size)
+    :param C2: Conceptor 2 (reservoir size x reservoir size)
+    :param U2: Singular vectors 2 (reservoir size x reservoir size)
+    :param S2: Singular values 2 (reservoir size)
+    :return: Conceptor cosine similarity (float) 0 <= similarity <= 1.0
     """
-    return math.pow(lin.norm(((np.diag(np.sqrt(S1)) @ U1.T) @ U2) @ np.sqrt(np.diag(S2)), 'fro'), 2) / (lin.norm(C1, 'fro') * lin.norm(C2, 'fro'))
+    # Assert types
+    assert isinstance(C1, np.ndarray)
+    assert isinstance(U1, np.ndarray)
+    assert isinstance(S1, np.ndarray)
+    assert isinstance(C2, np.ndarray)
+    assert isinstance(U2, np.ndarray)
+    assert isinstance(S2, np.ndarray)
+
+    # Assert dimensions
+    assert C1.ndim == 2
+    assert U1.ndim == 2
+    assert S1.ndim == 1
+    assert C2.ndim == 2
+    assert U2.ndim == 2
+    assert S2.ndim == 1
+
+    # Square matrix
+    assert C1.shape[0] == C1.shape[1]
+    assert U1.shape[0] == U1.shape[1]
+    assert C2.shape[0] == C2.shape[1]
+    assert U2.shape[0] == U2.shape[1]
+
+    # Similarity
+    similarity = math.pow(lin.norm(((np.diag(np.sqrt(S1)) @ U1.T) @ U2) @ np.sqrt(np.diag(S2)), 'fro'), 2) / (lin.norm(C1, 'fro') * lin.norm(C2, 'fro'))
+
+    # Assert result
+    assert similarity >= 0 and similarity <= float('inf')
+
+    return similarity
 # end conceptor_cosine_similarity
