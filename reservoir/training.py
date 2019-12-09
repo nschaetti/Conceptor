@@ -129,12 +129,12 @@ def train_outputs(training_states, training_targets, ridge_param_wout):
 
 
 # Incremental loading of a reservoir
-def incremental_loading(D, X, P, Win, A, aperture, training_length):
+def incremental_loading(D, Xold, P, Win, A, aperture, training_length):
     """
     Incremental loading of a reservoir.
     NOT YET TESTED.
     :param D: Current input simulation matrix (Nx x Nx)
-    :param X: Training states (Nx x Length)
+    :param Xold: Training states (Nx x Length)
     :param P: Original pattern (1 x Length)
     :param Win: Input weight matrix
     :param A: Current disjonction of all conceptors loaded
@@ -142,20 +142,29 @@ def incremental_loading(D, X, P, Win, A, aperture, training_length):
     :return: The new input simulation matrix D
     """
     # Reservoir size
-    reservoir_size = X.shape[0]
+    reservoir_size = Xold.shape[0]
 
-    # Compute D increment
-    Td = Win @ P.reshape(1, -1) - D @ X
+    # Difference between target patterns and was is predicted by
+    Td = Win @ P.reshape(1, -1) - D @ Xold
 
     # The linear subspace of the reservoir state space that are not yet
     # occupied by any pattern.
     F = NOT(A)
 
     # Filter old state to get only what is new
-    S_old = F @ X
+    S_old = F @ Xold
+
+    # xTx
+    sTs = S_old @ S_old.T / training_length
+
+    # xTx
+    sTs_ridge = sTs + math.pow(aperture, -2) * np.eye(reservoir_size)
+
+    # xTy
+    sTy = S_old @ Td.T / training_length
 
     # Compute the increment for matrix D
-    Dinc = (lin.pinv(S_old @ S_old.T / training_length + math.pow(aperture, -2) * np.eye(reservoir_size)) @ S_old @ Td.T) / training_length
+    Dinc = (lin.pinv(sTs_ridge) @ sTy).T
     """Dinc = (
             np.dot(
                 np.dot(

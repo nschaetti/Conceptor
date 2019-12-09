@@ -63,6 +63,9 @@ def run(pattern, reservoir_size, x_start, Wstar, Win, Wbias, run_length, washout
     # State collector
     state_collector = np.zeros((reservoir_size, run_length))
 
+    # State collector old
+    state_collector_old = np.zeros((reservoir_size, run_length))
+
     # Pattern collector
     pattern_collector = np.zeros(run_length)
 
@@ -74,6 +77,9 @@ def run(pattern, reservoir_size, x_start, Wstar, Win, Wbias, run_length, washout
         # Get input u_t
         u = np.array([pattern(t)])
 
+        # X old
+        x_old = x
+
         # Compute ESN equation
         x = np.tanh(Wstar.dot(x.T) + Win.dot(u) + Wbias)
         x = np.asarray(x).flatten()
@@ -81,9 +87,10 @@ def run(pattern, reservoir_size, x_start, Wstar, Win, Wbias, run_length, washout
         # If washout ended, save
         if t >= washout_length:
             state_collector[:, t - washout_length] = x
+            state_collector_old[:, t - washout_length] = x_old
             pattern_collector[t - washout_length] = u
         # end if
     # end if
 
-    return state_collector, pattern_collector
+    return state_collector, pattern_collector, state_collector_old
 # end run

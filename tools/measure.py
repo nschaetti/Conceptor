@@ -1,7 +1,7 @@
 # coding=utf-8
 #
-# File : __init__.py
-# Description : Tools sub-package.
+# File : interpolation.py
+# Description : Interpolation and alignment.
 # Date : 14th of October, 2019
 #
 # This file is part of the Conceptor package.  The Conceptor package is free
@@ -22,8 +22,14 @@
 #
 
 # Imports
-from .interpolation import interpolation_alignment_1d
-from .measure import measure_matrix_diff
+import numpy as np
+import numpy.linalg as lin
 
-# ALL
-__all__ = ['interpolation_alignment_1d', 'measure_matrix_diff']
+
+# Compare matrix difference
+def measure_matrix_diff(m1, m2):
+    """
+    Compare matrix difference
+    """
+    return lin.norm(m1 - m2)
+# end measure_matrix_diff

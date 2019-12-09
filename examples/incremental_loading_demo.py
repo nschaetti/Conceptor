@@ -24,7 +24,6 @@
 # Imports
 import numpy as np
 import numpy.linalg as lin
-import math
 import argparse
 
 # Conceptors
@@ -53,7 +52,7 @@ bias_scaling = 0.25
 # Incremental loading learning (batch offline)
 washout_length = 100
 learn_length = 100
-aperture = 10
+aperture = 1000
 
 # Incremental loading learning (online adaptive)
 adapt_length = 1500
@@ -98,7 +97,11 @@ else:
 # Load W from matlab file and random init ?
 if args.w != "":
     # Load internal weights
-    Wstar_raw = Conceptors.reservoir.load_matlab_file(args.w, args.w_name)
+    if args.w[-4:] == ".mat":
+        Wstar_raw = Conceptors.reservoir.load_matlab_file(args.w, args.w_name)
+    elif args.w[-4:] == ".npy":
+        Wstar_raw = np.load(args.w)
+    # end if
 else:
     # Generate internal weights
     Wstar_raw = Conceptors.reservoir.generate_internal_weights(reservoir_size, connectivity, seed)
@@ -106,7 +109,11 @@ else:
 
 # Load Win from matlab file or init randomly
 if args.win != "":
-    Win_raw = Conceptors.reservoir.load_matlab_file(args.win, args.win_name)
+    if args.win[-4:] == ".mat":
+        Win_raw = Conceptors.reservoir.load_matlab_file(args.win, args.win_name)
+    elif args.win[-4:] == ".npy":
+        Win_raw = np.load(args.win)
+    # end if
 else:
     # Generate Win
     Win_raw = np.random.randn(reservoir_size, 1)
@@ -114,10 +121,19 @@ else:
 
 # Load Wbias from matlab from or init randomly
 if args.wbias != "":
-    Wbias_raw = Conceptors.reservoir.load_matlab_file(args.wbias, args.wbias_name).reshape(-1)
+    if args.wbias[-4:] == ".mat":
+        Wbias_raw = Conceptors.reservoir.load_matlab_file(args.wbias, args.wbias_name).reshape(-1)
+    elif args.wbias[-4:] == ".npy":
+        Wbias_raw = np.load(args.wbias)
+    # end if
 else:
     Wbias_raw = np.random.randn(reservoir_size)
 # end if
+
+# Check W, Win and Wbias
+print("Wstar_raw: {}".format(Conceptors.tools.measure_matrix_diff(Wstar_raw, np.load("data/debug/fig5fig21/Wstar_raw.npy"))))
+print("Win_raw: {}".format(Conceptors.tools.measure_matrix_diff(Win_raw, np.load("data/debug/fig5fig21/Win_raw.npy"))))
+print("Wbias_raw: {}".format(Conceptors.tools.measure_matrix_diff(Wbias_raw, np.load("data/debug/fig5fig21/Wbias_raw.npy"))))
 
 # Scale raw weights and initialize weights
 Wstar, Win, Wbias = Conceptors.reservoir.scale_weights(
@@ -128,6 +144,11 @@ Wstar, Win, Wbias = Conceptors.reservoir.scale_weights(
     input_scaling=input_scaling,
     bias_scaling=bias_scaling
 )
+
+# Check W, Win and Wbias
+print("Wstar: {}".format(Conceptors.tools.measure_matrix_diff(Wstar, np.load("data/debug/fig5fig21/Wstar.npy"))))
+print("Win: {}".format(Conceptors.tools.measure_matrix_diff(Win, np.load("data/debug/fig5fig21/Win.npy"))))
+print("Wbias: {}".format(Conceptors.tools.measure_matrix_diff(Wbias, np.load("data/debug/fig5fig21/Wbias.npy"))))
 
 #
 # Incremental learning
@@ -176,7 +197,7 @@ for p in range(n_patterns):
     x = np.zeros(reservoir_size)
 
     # Run reservoir
-    state_collector, pattern_collector = Conceptors.reservoir.run(
+    state_collector, pattern_collector, state_collector_old = Conceptors.reservoir.run(
         pattern=patt,
         reservoir_size=reservoir_size,
         x_start=x,
@@ -187,11 +208,18 @@ for p in range(n_patterns):
         washout_length=washout_length
     )
 
+    # Check X and P and X old
+    print("X{}: {}".format(p, Conceptors.tools.measure_matrix_diff(state_collector, np.load("data/debug/fig5fig21/X{}.npy".format(p)))))
+    print("P{}: {}".format(p, Conceptors.tools.measure_matrix_diff(pattern_collector, np.load("data/debug/fig5fig21/P{}.npy".format(p)))))
+    print("XOld{}: {}".format(p, Conceptors.tools.measure_matrix_diff(state_collector_old, np.load("data/debug/fig5fig21/XOld{}.npy".format(p)))))
+
     # State collector
     state_collectors[p] = state_collector
 
     # Time shifted states
-    state_collector_old = Conceptors.reservoir.timeshift(state_collector, -1)
+    # state_collector_old = Conceptors.reservoir.timeshift(state_collector, -1)
+    # state_collector_old = np.zeros((reservoir_size, learn_length))
+    # state_collector_old[:, 1:] = state_collector[:, :-1]
 
     # Save patterns
     pattern_collectors[p] = pattern_collector
@@ -199,16 +227,9 @@ for p in range(n_patterns):
     # Patterns to plot
     plotting_patterns[p] = pattern_collector[:signal_plot_length]
 
-    # Train conceptor
-    C, U, Snew, Sorg, R = Conceptors.conceptors.train(
-        X=state_collector,
-        aperture=aperture
-    )
-    plt.imshow(C, cmap='Greys')
-    plt.title("Conceptor {}".format(p))
-    plt.show()
-    # Save conceptor and singular values
-    conceptor_collector.add(p, C, U, Snew, Sorg, R)
+    # plt.imshow(C, cmap='Greys')
+    # plt.title("Conceptor {}".format(p))
+    # plt.show()
 
     # Save last state
     last_states[:, p] = x
@@ -216,13 +237,16 @@ for p in range(n_patterns):
     # Compute D increment
     D = Conceptors.reservoir.incremental_loading(
         D=D,
-        X=state_collector_old,
+        Xold=state_collector_old,
         P=pattern_collector,
         Win=Win,
         A=conceptor_collector.A(),
         aperture=aperture,
         training_length=learn_length
     )
+
+    # Check D
+    print("D: {}".format(Conceptors.tools.measure_matrix_diff(D, np.load("data/debug/fig5fig21/D{}.npy".format(p)))))
 
     # Compute Wout
     Wout = Conceptors.reservoir.incremental_training(
@@ -234,8 +258,24 @@ for p in range(n_patterns):
         training_length=learn_length
     )
 
+    # Check Wout
+    print("Wout: {}".format(Conceptors.tools.measure_matrix_diff(Wout, np.load("data/debug/fig5fig21/Wout{}.npy".format(p)))))
+
+    # Train conceptor
+    C, U, Snew, Sorg, R = Conceptors.conceptors.train(
+        X=state_collector,
+        aperture=aperture
+    )
+
+    # Save conceptor and singular values
+    conceptor_collector.add(p, C, U, Snew, Sorg, R)
+
     # Disjonction of all conceptor
     A = conceptor_collector.A()
+
+    # Check C and A
+    print("C: {}".format(Conceptors.tools.measure_matrix_diff(C, np.load("data/debug/fig5fig21/C{}.npy".format(p)))))
+    print("A: {}".format(Conceptors.tools.measure_matrix_diff(A, np.load("data/debug/fig5fig21/A{}.npy".format(p)))))
 
     # Save A
     # A_collectors[p] = A
@@ -246,7 +286,7 @@ for p in range(n_patterns):
     quota_A[p] = Conceptors.conceptors.quota(A)
 
     # Quota of the resized conceptor
-    quota_C[p] = Conceptors.conceptors.quota(PHI(C, aperture))
+    quota_C[p] = Conceptors.conceptors.quota(C)
 # end for
 
 # Now we generate signal but with conceptors
@@ -260,10 +300,15 @@ for p in range(n_patterns):
     C, _, _, _, _ = conceptor_collector.get(p)
 
     # Get the corresponding conceptors
-    C = PHI(C, aperture)
+    # C = PHI(C, aperture)
 
-    # x0
-    x = np.random.randn(reservoir_size)
+    # Original starting state or get the original
+    if args.x0 != "":
+        original_x = Conceptors.reservoir.load_matlab_file(args.x0, args.x0_name)
+        x = original_x.reshape(reservoir_size)
+    else:
+        x = 0.5 * np.random.randn(reservoir_size)
+    # end if
 
     # Free run with the loaded reservoir
     test_states, test_output = Conceptors.reservoir.free_run_input_simulation(
