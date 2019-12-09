@@ -126,6 +126,10 @@ Wstar, Win, Wbias = Conceptors.reservoir.scale_weights(
     input_scaling=input_scaling,
     bias_scaling=bias_scaling
 )
+# Save
+np.save("Wstar.npy", Wstar.todense())
+np.save("Win.npy", Win)
+np.save("Wbias.npy", Wbias)
 
 # Number of patterns
 n_patterns = len(patterns)
@@ -186,14 +190,18 @@ for p in range(n_patterns):
         run_length=learn_length,
         washout_length=washout_length
     )
-
+    np.save("u{}.npy".format(p), pattern_collector.T)
+    np.save("X{}.npy".format(p), state_collector.T)
     # State collector
     state_collectors[p] = state_collector
 
     # Time shifted states
     state_collector_old = np.zeros((reservoir_size, learn_length))
     state_collector_old[:, 1:] = state_collector[:, :-1]
-
+    np.save("Xold{}.npy".format(p), state_collector_old.T)
+    # print(state_collector_old[0, 1])
+    # current_xTx = state_collector_old @ state_collector.T
+    # print(current_xTx[0, 0])
     # Save last state
     last_states[:, p] = state_collector[:, -1]
 
@@ -269,7 +277,7 @@ conceptor_test_output = np.zeros((n_patterns, conceptor_test_length))
 for p in range(n_patterns):
     # Get the corresponding conceptors
     C, _, _, _, _ = conceptor_collector.get(p)
-
+    np.save("C{}.npy".format(p), C)
     # Original starting state or get the original
     if args.x0 != "":
         original_x = Conceptors.reservoir.load_matlab_file("{}{}.mat".format(args.x0, p + 1), args.x0_name)

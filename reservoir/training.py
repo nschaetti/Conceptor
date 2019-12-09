@@ -89,7 +89,15 @@ def loading(X, Xold, Wbias, ridge_param):
     X_new = (
         np.arctanh(X) - np.repeat(Wbias.reshape(1, -1), learn_length, axis=0).T
     )
-
+    sample_learn_length = int(learn_length / 4)
+    for i in range(4):
+        np.save("Y{}.npy".format(i), X_new[:, i*sample_learn_length:i*sample_learn_length+sample_learn_length].T)
+    # end for
+    np.save("xTx.npy", Xold @ Xold.T)
+    np.save("xTy.npy", Xold @ X_new.T)
+    np.save("ridge_xTx.npy", Xold @ Xold.T + ridge_param * np.eye(reservoir_size))
+    np.save("inv_xTx.npy", lin.inv(Xold @ Xold.T + ridge_param * np.eye(reservoir_size)))
+    np.save("W.npy", ((lin.inv(Xold @ Xold.T + ridge_param * np.eye(reservoir_size)) @ Xold) @ X_new.T).T)
     # Learning W
     return (
         (lin.inv(Xold @ Xold.T + ridge_param * np.eye(reservoir_size)) @ Xold) @ X_new.T

@@ -159,7 +159,7 @@ def plot_patterns_with_infos(original_patterns, generated_patterns, gauge, info1
     pattern_length = original_patterns.shape[1]
 
     # Figure (square size)
-    plt.figure(figsize=(16, 4 * n_patterns))
+    plt.figure(figsize=(25, n_patterns))
 
     # Plot index
     plot_index = 0

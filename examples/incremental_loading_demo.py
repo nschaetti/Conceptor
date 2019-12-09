@@ -39,6 +39,9 @@ import Conceptors.logic
 # Operators
 from Conceptors.logic import PHI
 
+# Matplotlib
+import matplotlib.pyplot as plt
+
 # Setting system params
 seed = 1
 learn_type = 2
@@ -50,7 +53,7 @@ bias_scaling = 0.25
 # Incremental loading learning (batch offline)
 washout_length = 100
 learn_length = 100
-aperture = 1000
+aperture = 10
 
 # Incremental loading learning (online adaptive)
 adapt_length = 1500
@@ -201,7 +204,9 @@ for p in range(n_patterns):
         X=state_collector,
         aperture=aperture
     )
-
+    plt.imshow(C, cmap='Greys')
+    plt.title("Conceptor {}".format(p))
+    plt.show()
     # Save conceptor and singular values
     conceptor_collector.add(p, C, U, Snew, Sorg, R)
 
@@ -271,7 +276,9 @@ for p in range(n_patterns):
         run_length=conceptor_test_length,
         washout_length=0
     )
-
+    # plt.plot(test_output[-signal_plot_length:], color='g')
+    # plt.title("Pattern {}".format(p))
+    # plt.show()
     # Save
     conceptor_test_states[p] = test_states
     conceptor_test_output[p] = test_output

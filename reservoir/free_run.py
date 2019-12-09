@@ -23,6 +23,7 @@
 
 # Imports
 import numpy as np
+import scipy.sparse
 
 
 # Run reservoir with internal loaded matrix W
@@ -105,7 +106,7 @@ def free_run_input_simulation(x_start, W, D, Wbias, Wout, C, run_length, washout
     """
     # Assert types
     assert isinstance(x_start, np.ndarray)
-    assert isinstance(W, np.ndarray)
+    assert isinstance(W, np.ndarray) or isinstance(W, scipy.sparse.csc_matrix)
     assert isinstance(D, np.ndarray)
     assert isinstance(Wbias, np.ndarray)
     assert isinstance(Wout, np.ndarray)
