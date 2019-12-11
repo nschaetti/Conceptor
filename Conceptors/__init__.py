@@ -22,13 +22,7 @@
 #
 
 # Imports
-from . import conceptors
-from . import logic
-from . import measures
-from . import patterns
-from . import reservoir
-from . import tools
-from . import visualization
+from Conceptors import conceptors, measures, tools, patterns, logic, visualization, reservoir
 
 # ALL
 __all__ = ['conceptors', 'logic', 'measures', 'patterns', 'reservoir', 'tools', 'visualization']
